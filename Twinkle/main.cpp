@@ -223,21 +223,53 @@ class Triangle {
     unsigned int vao;	// vertex array object id
     float sx, sy;		// scaling
     float wTx, wTy;		// translation
+    float coords[6];
     public:
     Triangle() {
         Animate(0);
     }
     
-    void Create() {
+    float* rotateCoords(vec4 center, float a) {
+        a = a * M_PI / 180;
+        
+        float x1 = ((center.v[0]-1.0f - center.v[0]) * cos(a)) - ((center.v[1]-1.0f - center.v[1]) * sin(a)) + center.v[0];
+        float y1 = ((center.v[0]-1.0f - center.v[0]) * sin(a)) + ((center.v[1]-1.0f - center.v[1]) * cos(a)) + center.v[1];
+        
+        float x2 = ((center.v[0]+1.0f - center.v[0]) * cos(a)) - ((center.v[1]-1.0f - center.v[1]) * sin(a)) + center.v[0];
+        float y2 = ((center.v[0]+1.0f - center.v[0]) * sin(a)) + ((center.v[1]-1.0f - center.v[1]) * cos(a)) + center.v[1];
+        
+        float x3 = ((center.v[0] - center.v[0]) * cos(a)) - ((center.v[1]+1.0f - center.v[1]) * sin(a)) + center.v[0];
+        float y3 = ((center.v[0] - center.v[0]) * sin(a)) + ((center.v[1]+1.0f - center.v[1]) * cos(a)) + center.v[1];
+        
+        coords[0] = x1;
+        coords[1] = y1;
+        coords[2] = x2;
+        coords[3] = y2;
+        coords[4] = x3;
+        coords[5] = y3;
+        return coords;
+    }
+    
+    void Create(vec4 center, float a) {
         glGenVertexArrays(1, &vao);	// create 1 vertex array object
         glBindVertexArray(vao);		// make it active
         
         unsigned int vbo[2];		// vertex buffer objects
         glGenBuffers(2, &vbo[0]);	// Generate 2 vertex buffer objects
+        float c[18];
+        
+        for(int i = 0; i < 3; i++) {
+            float* temp;
+            temp = rotateCoords(center, i * a);
+            for(int j = 0; j < 6; j++){
+                c[i*6+j] = temp[j];
+                printf("coord: %f\n", c[i*6+j]);
+            }
+        }
         
         // vertex coordinates: vbo[0] -> Attrib Array 0 -> vertexPosition of the vertex shader
         glBindBuffer(GL_ARRAY_BUFFER, vbo[0]); // make it active, it is an array
-        static float vertexCoords[] = { -8, -8, -6, 10, 8, -2 };	// vertex data on the CPU
+        static float vertexCoords[] = { c[6], c[7], c[8], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };	// vertex data on the CPU
         glBufferData(GL_ARRAY_BUFFER,      // copy to the GPU
                      sizeof(vertexCoords),  // number of the vbo in bytes
                      vertexCoords,		   // address of the data array on the CPU
@@ -252,7 +284,7 @@ class Triangle {
         
         // vertex colors: vbo[1] -> Attrib Array 1 -> vertexColor of the vertex shader
         glBindBuffer(GL_ARRAY_BUFFER, vbo[1]); // make it active, it is an array
-        static float vertexColors[] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };	// vertex data on the CPU
+        static float vertexColors[] = { 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0 };	// vertex data on the CPU
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColors), vertexColors, GL_STATIC_DRAW);	// copy to the GPU
         
         // Map Attribute Array 1 to the current bound vertex buffer (vbo[1])
@@ -262,19 +294,27 @@ class Triangle {
     }
     
     void Animate(float t) {
-        sx = 1; // *sinf(t);
-        sy = 1; // *cosf(t);
-        wTx = 0; // 4 * cosf(t / 2);
-        wTy = 0; // 4 * sinf(t / 2);
+        sx = -0.5 * sinf(t);
+        sy = cosf(t);
+        wTx = 0;
+        wTy = 0;
+        printf("anima\n");
     }
     
     void Draw() {
-        mat4 M(sx, 0, 0, 0,
-               0, sy, 0, 0,
+        
+        mat4 M(1, 0, 0, 0,
+               0, 1, 0, 0,
                0, 0, 0, 0,
                wTx, wTy, 0, 1); // model matrix
         
-        mat4 MVPTransform = M * camera.V() * camera.P();
+        mat4 rotate(sy, sx, 0, 0,
+               sx, sy, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 1); // rotate matrix
+        
+        
+        mat4 MVPTransform = rotate * M * camera.V() * camera.P();
         
         // set GPU uniform matrix variable MVP with the content of CPU variable MVPTransform
         int location = glGetUniformLocation(shaderProgram, "MVP");
@@ -339,17 +379,161 @@ class LineStrip {
     }
 };
 
+class Star {
+
+public:
+    Triangle star_triangles[3];
+    
+    void Create(vec4 center) {
+        star_triangles[0].Create(center, 0);
+        star_triangles[1].Create(center, 40);
+        star_triangles[2].Create(center, 80);
+    }
+    
+    void Draw() {
+        
+        star_triangles[0].Draw();
+        star_triangles[1].Draw();
+        star_triangles[2].Draw();
+    }
+};
+//
+//class Spline {
+//    
+//public:
+//    int pointNum;
+//    ControllPoint cp_array[100];
+//    
+//    
+//    Spline(int num){
+//        pointNum = num;
+//    }
+//    
+//    vec4& p(int i) {
+//        return cp_array[i].center;
+//    }
+//    
+//    vec4 a0(int i){
+//        return p(i);
+//    }
+//    
+//    vec4 a1(int i){
+//        return v(i);
+//    }
+//    
+//    vec4 a2(int i){
+//        vec4 a2 = (((p(i+1) * 3.0f) - (p(i) * 3.0f)) / pow(t(i+1) - t(i), 2)) -
+//        ((v(i+1) + v(i) * 2.0f)  /  (t(i+1) - t(i)));
+//        
+//        return a2;
+//    }
+//    
+//    vec4 a3(int i){
+//        vec4 a3 = (((p(i) * 2.0f) - (p(i+1) * 2.0f)) / pow(t(i+1) - t(i), 3)) +
+//        ((v(i+1) + v(i))  /  pow(t(i+1) - t(i), 2));
+//        
+//        return a3;
+//    }
+//    
+//    
+//    
+//    float t(int i){
+//        return cp_array[i].time;
+//    }
+//    
+//    vec4 v(int i){
+//        return cp_array[i].speed;
+//    }
+//    
+//    void setSpeeds() {
+//        vec4 n(100.21f, 234.0f);
+//        cp_array[0].speed = n;
+//        cp_array[pointNum].speed = n;
+//        
+//        for(int i = 1; i < pointNum; i++){
+//            
+//            vec4 first = (p(i+1) - p(i)) / (t(i+1) - t(i));
+//            vec4 next = (p(i) - p(i-1)) / (t(i) - t(i-1));
+//            cp_array[i].speed = ((first + next) / 2.0f);
+//        }
+//    }
+//    
+//    vec4 f(int i, float t){
+//        
+//        vec4 r = a3(i) * pow(t - cp_array[i].time, 3)
+//        + a2(i) * pow(t - cp_array[i].time, 2)
+//        + a1(i) * (t - cp_array[i].time) + a0(i);
+//        
+//        return r;
+//    }
+//    
+//    vec4 d(int i, float t){
+//        
+//        vec4 r = a3(i) * 3.0f * pow(t - cp_array[i].time, 2)
+//        + a2(i) * 2.0f *  (t - cp_array[i].time) + a1(i);
+//        
+//        return r;
+//    }
+//    
+//    vec4 drawTangent(vec4 ip){
+//        vec4 n = dir.norm();
+//        
+//        glColor3f(0.0f, 1.0f, 0.0f);
+//        glBegin(GL_LINE_STRIP); {
+//            
+//            for(int x = 0; x < 1000; x++) {
+//                float y = ((n.x * ip.x) + (n.y * ip.y) - (n.x * x)) / n.y;
+//                glVertex2f(x, y);
+//            }
+//        }
+//        glEnd();
+//    }
+//    
+//    void drawSpline(){
+//        
+//        float end_time = 0.0;
+//        
+//        for(int i = 0; i < pointNum; i++){
+//            end_time += cp_array[i].time;
+//        }
+//        
+//        end_time = ( end_time / pointNum ) + cp_array[ pointNum - 1 ].time;
+//        cp_array[pointNum] = ControllPoint(cp_array[0].center, end_time);
+//        setSpeeds();
+//        
+//        glColor3f(1.0f, 1.0f, 1.0f);
+//        glBegin(GL_LINE_STRIP); {
+//            
+//            for(int i = 0; i < pointNum; i++) {
+//                float step = (cp_array[i+1].time - cp_array[i].time) / 1000.0f;
+//                for(float t = cp_array[i].time; t < cp_array[i+1].time; t += step) {
+//                    
+//                    vec4 v = f(i, t);
+//                    glVertex2f(v.x, v.y);
+//                }
+//            }
+//        }
+//        glEnd();
+//        
+//    }
+//    
+//};
+
 // The virtual world: collection of two objects
-Triangle triangle;
+Triangle tr1, tr2;
+
 LineStrip lineStrip;
+Star star;
 
 // Initialization, create an OpenGL context
 void onInitialization() {
     glViewport(0, 0, windowWidth, windowHeight);
     
+    vec4 star_center(0.0, 0.0, 0.0, 1.0);
+    
     // Create objects by setting up their vertex data on the GPU
-    triangle.Create();
     lineStrip.Create();
+    star.Create(star_center);
     
     // Create vertex shader from string
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -404,8 +588,9 @@ void onDisplay() {
     glClearColor(0, 0, 0, 0);							// background color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
     
-    triangle.Draw();
+    //triangle.Draw();
     lineStrip.Draw();
+    star.Draw();
     glutSwapBuffers();									// exchange the two buffers
 }
 
@@ -437,8 +622,10 @@ void onMouseMotion(int pX, int pY) {
 void onIdle() {
     long time = glutGet(GLUT_ELAPSED_TIME); // elapsed time since the start of the program
     float sec = time / 1000.0f;				// convert msec to sec
-    camera.Animate(sec);					// animate the camera
-    triangle.Animate(sec);					// animate the triangle object
+    camera.Animate(sec);                    // animate the camera
+    //star.star_triangles[0].Animate(sec);	// animate the triangle object
+    //star.star_triangles[1].Animate(sec);
+    //star.star_triangles[2].Animate(sec);
     glutPostRedisplay();					// redraw the scene
 }
 
