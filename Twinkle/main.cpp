@@ -18,8 +18,8 @@
 //
 // NYILATKOZAT
 // ---------------------------------------------------------------------------------------------
-// Nev    :
-// Neptun :
+// Nev    : Bajorics Bence
+// Neptun : CG7L3O
 // ---------------------------------------------------------------------------------------------
 // ezennel kijelentem, hogy a feladatot magam keszitettem, es ha barmilyen segitseget igenybe vettem vagy
 // mas szellemi termeket felhasznaltam, akkor a forrast es az atvett reszt kommentekben egyertelmuen jeloltem.
@@ -38,6 +38,12 @@
 #include <math.h>
 
 #include <vector>
+
+//=============================================================================================
+#include <iostream>
+#include <fstream>
+using namespace std;
+//=============================================================================================
 
 #if defined(__APPLE__)
 #include <GLUT/GLUT.h>
@@ -124,7 +130,7 @@ void main() {
 // row-major matrix 4x4
 struct mat4 {
     float m[4][4];
-    public:
+public:
     mat4() {}
     mat4(float m00, float m01, float m02, float m03,
          float m10, float m11, float m12, float m13,
@@ -166,13 +172,28 @@ struct vec4 {
         }
         return result;
     }
+    
+    vec4 operator*(float f) {
+        return vec4(v[0] * f, v[1] * f, v[2] * f);
+    }
+    
+    vec4 operator/(float f) {
+        return vec4(v[0] / f, v[1] / f, v[2] / f);
+    }
+    
+    vec4 operator+(const vec4& vec) {
+        return vec4(v[0] + vec.v[0], v[1] + vec.v[1], v[2] + vec.v[2]);
+    }
+    vec4 operator-(const vec4& vec) {
+        return vec4(v[0] - vec.v[0], v[1] - vec.v[1], v[2] - vec.v[2]);
+    }
 };
 
 // 2D camera
 struct Camera {
     float wCx, wCy;	// center in world coordinates
     float wWx, wWy;	// width and height in world coordinates
-    public:
+public:
     Camera() {
         Animate(0);
     }
@@ -206,8 +227,8 @@ struct Camera {
     }
     
     void Animate(float t) {
-        wCx = 0; // 10 * cosf(t);
-        wCy = 0;
+        //wCx = 0; // 10 * cosf(t);
+        //wCy = 0;
         wWx = 20;
         wWy = 20;
     }
@@ -215,61 +236,32 @@ struct Camera {
 
 // 2D camera
 Camera camera;
-
+bool spacePressed = false;
 // handle of the shader program
 unsigned int shaderProgram;
 
 class Triangle {
     unsigned int vao;	// vertex array object id
-    float sx, sy;		// scaling
     float wTx, wTy;		// translation
-    float coords[6];
-    public:
+    float sx, sy;
+public:
+    
+    vec4 color;
+    
     Triangle() {
         Animate(0);
     }
     
-    float* rotateCoords(vec4 center, float a) {
-        a = a * M_PI / 180;
-        
-        float x1 = ((center.v[0]-1.0f - center.v[0]) * cos(a)) - ((center.v[1]-1.0f - center.v[1]) * sin(a)) + center.v[0];
-        float y1 = ((center.v[0]-1.0f - center.v[0]) * sin(a)) + ((center.v[1]-1.0f - center.v[1]) * cos(a)) + center.v[1];
-        
-        float x2 = ((center.v[0]+1.0f - center.v[0]) * cos(a)) - ((center.v[1]-1.0f - center.v[1]) * sin(a)) + center.v[0];
-        float y2 = ((center.v[0]+1.0f - center.v[0]) * sin(a)) + ((center.v[1]-1.0f - center.v[1]) * cos(a)) + center.v[1];
-        
-        float x3 = ((center.v[0] - center.v[0]) * cos(a)) - ((center.v[1]+1.0f - center.v[1]) * sin(a)) + center.v[0];
-        float y3 = ((center.v[0] - center.v[0]) * sin(a)) + ((center.v[1]+1.0f - center.v[1]) * cos(a)) + center.v[1];
-        
-        coords[0] = x1;
-        coords[1] = y1;
-        coords[2] = x2;
-        coords[3] = y2;
-        coords[4] = x3;
-        coords[5] = y3;
-        return coords;
-    }
-    
-    void Create(vec4 center, float a) {
+    void Create() {
         glGenVertexArrays(1, &vao);	// create 1 vertex array object
         glBindVertexArray(vao);		// make it active
         
         unsigned int vbo[2];		// vertex buffer objects
         glGenBuffers(2, &vbo[0]);	// Generate 2 vertex buffer objects
-        float c[18];
-        
-        for(int i = 0; i < 3; i++) {
-            float* temp;
-            temp = rotateCoords(center, i * a);
-            for(int j = 0; j < 6; j++){
-                c[i*6+j] = temp[j];
-                printf("coord: %f\n", c[i*6+j]);
-            }
-        }
         
         // vertex coordinates: vbo[0] -> Attrib Array 0 -> vertexPosition of the vertex shader
         glBindBuffer(GL_ARRAY_BUFFER, vbo[0]); // make it active, it is an array
-        static float vertexCoords[] = { c[6], c[7], c[8], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };	// vertex data on the CPU
+        static float vertexCoords[] = { -1.0f, -sqrtf(3.0f) / 3.0f, 1.0f, -sqrtf(3.0f) / 3.0f, -0.0f, 2 * sqrtf(3.0f) / 3.0f };	// vertex data on the CPU
         glBufferData(GL_ARRAY_BUFFER,      // copy to the GPU
                      sizeof(vertexCoords),  // number of the vbo in bytes
                      vertexCoords,		   // address of the data array on the CPU
@@ -282,9 +274,9 @@ class Triangle {
                               GL_FALSE,		// not in fixed point format, do not normalized
                               0, NULL);     // stride and offset: it is tightly packed
         
-        // vertex colors: vbo[1] -> Attrib Array 1 -> vertexColor of the vertex shader
+						  // vertex colors: vbo[1] -> Attrib Array 1 -> vertexColor of the vertex shader
         glBindBuffer(GL_ARRAY_BUFFER, vbo[1]); // make it active, it is an array
-        static float vertexColors[] = { 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0 };	// vertex data on the CPU
+        float vertexColors[] = { color.v[0], color.v[1], color.v[2], color.v[0], color.v[1], color.v[2], color.v[0], color.v[1], color.v[2] };	// vertex data on the CPU
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColors), vertexColors, GL_STATIC_DRAW);	// copy to the GPU
         
         // Map Attribute Array 1 to the current bound vertex buffer (vbo[1])
@@ -293,28 +285,34 @@ class Triangle {
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL); // Attribute Array 1, components/attribute, component type, normalize?, tightly packed
     }
     
-    void Animate(float t) {
-        sx = -0.5 * sinf(t);
-        sy = cosf(t);
-        wTx = 0;
-        wTy = 0;
-        printf("anima\n");
+    void Animate(float a) {
+        a = a * M_PI / 180.0f;
+        sx = sinf(a);
+        sy = cosf(a);
+        wTx = 0; // 4 * cosf(t / 2);
+        wTy = 0; // 4 * sinf(t / 2);
     }
     
-    void Draw() {
+    void Draw(float size, mat4 Rp, mat4 Ms) {
         
-        mat4 M(1, 0, 0, 0,
-               0, 1, 0, 0,
+        size = size / 60.0f;
+        
+        mat4 S(size, 0, 0, 0,
+               0, size, 0, 0,
                0, 0, 0, 0,
-               wTx, wTy, 0, 1); // model matrix
+               0, 0, 0, 1); // scale matrix
         
-        mat4 rotate(sy, sx, 0, 0,
+        mat4 R(sy, -sx, 0, 0,
                sx, sy, 0, 0,
                0, 0, 0, 0,
                0, 0, 0, 1); // rotate matrix
         
+        mat4 M(1, 0, 0, 0,
+               0, 1, 0, 0,
+               0, 0, 0, 0,
+               wTx, wTy, 0, 1); // M matrix
         
-        mat4 MVPTransform = rotate * M * camera.V() * camera.P();
+        mat4 MVPTransform = S * R * Rp * M * Ms * camera.V() * camera.P();
         
         // set GPU uniform matrix variable MVP with the content of CPU variable MVPTransform
         int location = glGetUniformLocation(shaderProgram, "MVP");
@@ -328,9 +326,9 @@ class Triangle {
 
 class LineStrip {
     GLuint vao, vbo;        // vertex array object, vertex buffer object
-    float  vertexData[100]; // interleaved data of coordinates and colors
     int    nVertices;       // number of vertices
-    public:
+public:
+    float  vertexData[27500];
     LineStrip() {
         nVertices = 0;
     }
@@ -350,19 +348,28 @@ class LineStrip {
     }
     
     void AddPoint(float cX, float cY) {
-        if (nVertices >= 20) return;
+        //printf("%f,    %f\n", cX, cY);
+        if (nVertices >= 5500) return;
         
         vec4 wVertex = vec4(cX, cY, 0, 1) * camera.Pinv() * camera.Vinv();
         // fill interleaved data
         vertexData[5 * nVertices] = wVertex.v[0];
         vertexData[5 * nVertices + 1] = wVertex.v[1];
-        vertexData[5 * nVertices + 2] = 1; // red
-        vertexData[5 * nVertices + 3] = 1; // green
-        vertexData[5 * nVertices + 4] = 0; // blue
+        vertexData[5 * nVertices + 2] = 0.4; // red
+        vertexData[5 * nVertices + 3] = 0.2; // green
+        vertexData[5 * nVertices + 4] = 0.0; // blue
         nVertices++;
         // copy data to the GPU
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, nVertices * 5 * sizeof(float), vertexData, GL_DYNAMIC_DRAW);
+    }
+    
+    void Clear_data() {
+        
+        for (int i = 0; i < 27500; i++) {
+            vertexData[i] = 0;
+        }
+        nVertices = 0;
     }
     
     void Draw() {
@@ -380,160 +387,245 @@ class LineStrip {
 };
 
 class Star {
-
+    Triangle triangles[3];
+    float sx, sy;
+    int caught;
 public:
-    Triangle star_triangles[3];
+    float wTx, wTy;
+    float mass;
     
-    void Create(vec4 center) {
-        star_triangles[0].Create(center, 0);
-        star_triangles[1].Create(center, 40);
-        star_triangles[2].Create(center, 80);
+    Star() {
     }
     
-    void Draw() {
+    void Create(float r, float g, float b, float mass, float pos) {
         
-        star_triangles[0].Draw();
-        star_triangles[1].Draw();
-        star_triangles[2].Draw();
+        this->mass = mass;
+        caught = 0;
+        
+        Triangle triangle1;
+        Triangle triangle2;
+        Triangle triangle3;
+        
+        vec4 color(r, g, b, 0);
+        triangle1.color = color;
+        triangle2.color = color;
+        triangle3.color = color;
+        
+        triangle1.Create();
+        triangle2.Create();
+        triangle3.Create();
+        
+        triangles[0] = triangle1;
+        triangles[1] = triangle2;
+        triangles[2] = triangle3;
+        
+        wTx = pos;
+        wTy = pos;
     }
+    
+    void Animate(float t) {
+        sx = 0.5f * sinf(t);
+        sy = cosf(t);
+    }
+    
+    void AnimateTriangles() {
+        
+        for (int i = 0; i < 3; i++) {
+            triangles[i].Animate(i * 40);
+        }
+    }
+    
+    void NGravity(Star big, float t) {
+        float F, G, Rsqr;
+        G = 0.005f;
+        
+        Rsqr = pow((big.wTx - wTx), 2) + pow((big.wTy - wTy), 2);
+        
+        if (Rsqr == 0) {
+            Rsqr = 0.00001;
+        }
+        F = G * mass * big.mass / Rsqr;
+        
+        vec4 velocity;
+        
+        float mu = ((F - (0.00001f * mass)) / F);
+        if(mu > 1.0f) mu = 1.0f;
+        
+        printf("mu %f\n", mu);
+        velocity = vec4((big.wTx - wTx) / sqrt(Rsqr), (big.wTy - wTy) / sqrt(Rsqr), 0.0, 1.0) * (F + ((-1.0)*mu   * F )) * t;
+        
+        //printf("wTx:%f, wTx:%f\n", wTx, wTy);
+        //if(firstTime == 0) {
+//            float d0 = sqrt(pow((wTx - 0.0f), 2) + pow((wTy - 0.0f), 2));
+//            wTx = wTx/d0;
+//            wTy = wTy/d0;
+//            firstTime++;
+        //}
+                     
+        wTx = wTx + velocity.v[0] * t;
+        wTy = wTy + velocity.v[1] * t;
+    }
+    
+    void Draw(float pos) {
+        mat4 R(sy, -sx, 0, 0,
+               sx, sy, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 1); // rotate matrix
+        
+        mat4 M(1, 0, 0, 0,
+               0, 1, 0, 0,
+               0, 0, 0, 0,
+               wTx, wTy, 0, 1); // M matrix
+        
+        
+        for (int i = 0; i < 3; i++) {
+            triangles[i].Draw(mass * 10.0f, R, M);
+        }
+    }
+    
 };
-//
-//class Spline {
-//    
-//public:
-//    int pointNum;
-//    ControllPoint cp_array[100];
-//    
-//    
-//    Spline(int num){
-//        pointNum = num;
-//    }
-//    
-//    vec4& p(int i) {
-//        return cp_array[i].center;
-//    }
-//    
-//    vec4 a0(int i){
-//        return p(i);
-//    }
-//    
-//    vec4 a1(int i){
-//        return v(i);
-//    }
-//    
-//    vec4 a2(int i){
-//        vec4 a2 = (((p(i+1) * 3.0f) - (p(i) * 3.0f)) / pow(t(i+1) - t(i), 2)) -
-//        ((v(i+1) + v(i) * 2.0f)  /  (t(i+1) - t(i)));
-//        
-//        return a2;
-//    }
-//    
-//    vec4 a3(int i){
-//        vec4 a3 = (((p(i) * 2.0f) - (p(i+1) * 2.0f)) / pow(t(i+1) - t(i), 3)) +
-//        ((v(i+1) + v(i))  /  pow(t(i+1) - t(i), 2));
-//        
-//        return a3;
-//    }
-//    
-//    
-//    
-//    float t(int i){
-//        return cp_array[i].time;
-//    }
-//    
-//    vec4 v(int i){
-//        return cp_array[i].speed;
-//    }
-//    
-//    void setSpeeds() {
-//        vec4 n(100.21f, 234.0f);
-//        cp_array[0].speed = n;
-//        cp_array[pointNum].speed = n;
-//        
-//        for(int i = 1; i < pointNum; i++){
-//            
-//            vec4 first = (p(i+1) - p(i)) / (t(i+1) - t(i));
-//            vec4 next = (p(i) - p(i-1)) / (t(i) - t(i-1));
-//            cp_array[i].speed = ((first + next) / 2.0f);
-//        }
-//    }
-//    
-//    vec4 f(int i, float t){
-//        
-//        vec4 r = a3(i) * pow(t - cp_array[i].time, 3)
-//        + a2(i) * pow(t - cp_array[i].time, 2)
-//        + a1(i) * (t - cp_array[i].time) + a0(i);
-//        
-//        return r;
-//    }
-//    
-//    vec4 d(int i, float t){
-//        
-//        vec4 r = a3(i) * 3.0f * pow(t - cp_array[i].time, 2)
-//        + a2(i) * 2.0f *  (t - cp_array[i].time) + a1(i);
-//        
-//        return r;
-//    }
-//    
-//    vec4 drawTangent(vec4 ip){
-//        vec4 n = dir.norm();
-//        
-//        glColor3f(0.0f, 1.0f, 0.0f);
-//        glBegin(GL_LINE_STRIP); {
-//            
-//            for(int x = 0; x < 1000; x++) {
-//                float y = ((n.x * ip.x) + (n.y * ip.y) - (n.x * x)) / n.y;
-//                glVertex2f(x, y);
-//            }
-//        }
-//        glEnd();
-//    }
-//    
-//    void drawSpline(){
-//        
-//        float end_time = 0.0;
-//        
-//        for(int i = 0; i < pointNum; i++){
-//            end_time += cp_array[i].time;
-//        }
-//        
-//        end_time = ( end_time / pointNum ) + cp_array[ pointNum - 1 ].time;
-//        cp_array[pointNum] = ControllPoint(cp_array[0].center, end_time);
-//        setSpeeds();
-//        
-//        glColor3f(1.0f, 1.0f, 1.0f);
-//        glBegin(GL_LINE_STRIP); {
-//            
-//            for(int i = 0; i < pointNum; i++) {
-//                float step = (cp_array[i+1].time - cp_array[i].time) / 1000.0f;
-//                for(float t = cp_array[i].time; t < cp_array[i+1].time; t += step) {
-//                    
-//                    vec4 v = f(i, t);
-//                    glVertex2f(v.x, v.y);
-//                }
-//            }
-//        }
-//        glEnd();
-//        
-//    }
-//    
-//};
+
+class ControllPoint {
+    
+public:
+    vec4 center;
+    vec4 speed;
+    float time;
+    
+    ControllPoint() {}
+    
+    ControllPoint(vec4 center, float t) : center(center), time(t) {
+        speed = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+    
+    ~ControllPoint() {}
+    
+};
+
+class Spline {
+public:
+    int cpNum;
+    ControllPoint cp_array[11];
+    LineStrip line;
+    
+    
+    Spline(int num) {
+        cpNum = num;
+    }
+    
+    vec4& p(int i) {
+        return cp_array[i].center;
+    }
+    
+    vec4 a0(int i) {
+        return p(i);
+    }
+    
+    vec4 a1(int i) {
+        return v(i);
+    }
+    
+    vec4 a2(int i) {
+        vec4 a2 = (((p(i + 1) * 3.0f) - (p(i) * 3.0f)) / pow(t(i + 1) - t(i), 2)) -
+        ((v(i + 1) + v(i) * 2.0f) / (t(i + 1) - t(i)));
+        
+        return a2;
+    }
+    
+    vec4 a3(int i) {
+        vec4 a3 = (((p(i) * 2.0f) - (p(i + 1) * 2.0f)) / pow(t(i + 1) - t(i), 3)) +
+        ((v(i + 1) + v(i)) / pow(t(i + 1) - t(i), 2));
+        
+        return a3;
+    }
+    
+    
+    
+    float t(int i) {
+        return cp_array[i].time;
+    }
+    
+    vec4 v(int i) {
+        return cp_array[i].speed;
+    }
+    
+    void setSpeeds() {
+        //vec4 n(100.21f, 234.0f ,0.0f, 1.0f);
+        //vec4 n(-0.1529f, 0.3207f ,0.0f, 1.0f);
+        //	cp_array[0].speed = n;
+        //	cp_array[cpNum + 1].speed = n;
+        
+        for (int i = 0; i < cpNum + 1; i++) {
+            
+            vec4 first = (p(i + 1) - p(i)) / (t(i + 1) - t(i));
+            vec4 next = (p(i) - p(i - 1)) / (t(i) - t(i - 1));
+            cp_array[i].speed = ((first + next) / 2.0f);
+        }
+    }
+    
+    vec4 f(int i, float t) {
+        
+        vec4 r = a3(i) * pow(t - cp_array[i].time, 3)
+        + a2(i) * pow(t - cp_array[i].time, 2)
+        + a1(i) * (t - cp_array[i].time) + a0(i);
+        
+        //r = r /10.0f;
+        //printf("vector: x: %f, y: %f\n", r.v[0], r.v[1]);
+        
+        return r;
+    }
+    
+    vec4 d(int i, float t) {
+        
+        vec4 r = a3(i) * 3.0f * pow(t - cp_array[i].time, 2)
+        + a2(i) * 2.0f *  (t - cp_array[i].time) + a1(i);
+        
+        return r;
+    }
+    
+    void createLine() {
+        
+        float step = 0.0f;
+        
+        cp_array[cpNum + 1] = ControllPoint(cp_array[0].center, cp_array[cpNum].time+500.0f);
+        setSpeeds();
+        
+        line.Clear_data();
+        for (int j = 0; j < cpNum+1; j++) {
+            step = (cp_array[j+1].time - cp_array[j].time) / 500.0f;
+            
+            
+            for (int i = 0; i < 500; i++) {
+                
+                vec4 v = f(j, cp_array[j].time + i * step);
+                line.AddPoint(v.v[0] + camera.wCx, v.v[1] + camera.wCy);
+                
+            }
+            
+        }        
+    }
+    
+};
 
 // The virtual world: collection of two objects
-Triangle tr1, tr2;
-
+ControllPoint cp;
+Spline spline(0);
 LineStrip lineStrip;
-Star star;
+
+Star starBig;
+Star starMiddle;
+Star starSmall;
 
 // Initialization, create an OpenGL context
 void onInitialization() {
     glViewport(0, 0, windowWidth, windowHeight);
     
-    vec4 star_center(0.0, 0.0, 0.0, 1.0);
-    
     // Create objects by setting up their vertex data on the GPU
     lineStrip.Create();
-    star.Create(star_center);
+    starBig.Create(1.0f, 1.0f, 0.0f, 6.0f, 0.0f);
+    starMiddle.Create(0.6f, 0.6f, 0.1f, 4.0f, 2.0f);
+    starSmall.Create(0.5f, 0.4f, 0.2f, 3.0f, -3.0f);
+    spline.line.Create();
     
     // Create vertex shader from string
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -587,16 +679,28 @@ void onExit() {
 void onDisplay() {
     glClearColor(0, 0, 0, 0);							// background color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
+
+    //lineStrip.Draw();
+    spline.line.Draw();
+    starBig.Draw(0.0f);
+    starMiddle.Draw(2.0f);
+    starSmall.Draw(-3.0f);
     
-    //triangle.Draw();
-    lineStrip.Draw();
-    star.Draw();
     glutSwapBuffers();									// exchange the two buffers
 }
 
 // Key of ASCII code pressed
 void onKeyboard(unsigned char key, int pX, int pY) {
     if (key == 'd') glutPostRedisplay();         // if d, invalidate display, i.e. redraw
+    if (key == 's') {
+        for (int i = 0; i < spline.cpNum + 1; i++) {
+            printf("cp:  x:%f, y:%f time:%f\n", spline.cp_array[i].center.v[0], spline.cp_array[i].center.v[1], spline.cp_array[i].time);
+        }
+    }
+    if (key == ' ') {
+        if (spacePressed == false)
+            spacePressed = true;
+    }
 }
 
 // Key of ASCII code released
@@ -607,9 +711,26 @@ void onKeyboardUp(unsigned char key, int pX, int pY) {
 // Mouse click event
 void onMouse(int button, int state, int pX, int pY) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {  // GLUT_LEFT_BUTTON / GLUT_RIGHT_BUTTON and GLUT_DOWN / GLUT_UP
+        
         float cX = 2.0f * pX / windowWidth - 1;	// flip y axis
         float cY = 1.0f - 2.0f * pY / windowHeight;
-        lineStrip.AddPoint(cX, cY);
+        
+        if (spline.cpNum <= 10) {
+            
+            //lineStrip.AddPoint(cX, cY);
+            
+            long t = glutGet(GLUT_ELAPSED_TIME);
+            
+            vec4 center(cX, cY, 0.0f, 1.0f);
+            
+            spline.cp_array[spline.cpNum] = ControllPoint(center, t);
+            
+            if (spline.cpNum > 0) {
+                spline.createLine();
+            }
+            spline.cpNum = spline.cpNum + 1;
+        }
+        
         glutPostRedisplay();     // redraw
     }
 }
@@ -618,14 +739,45 @@ void onMouse(int button, int state, int pX, int pY) {
 void onMouseMotion(int pX, int pY) {
 }
 
+int splinePosition = 0;
+float lastTime = 0;
+
 // Idle event indicating that some time elapsed: do animation here
 void onIdle() {
     long time = glutGet(GLUT_ELAPSED_TIME); // elapsed time since the start of the program
     float sec = time / 1000.0f;				// convert msec to sec
-    camera.Animate(sec);                    // animate the camera
-    //star.star_triangles[0].Animate(sec);	// animate the triangle object
-    //star.star_triangles[1].Animate(sec);
-    //star.star_triangles[2].Animate(sec);
+    camera.Animate(sec);					// animate the camera
+    
+    starBig.AnimateTriangles();
+    starMiddle.AnimateTriangles();
+    starSmall.AnimateTriangles();
+    
+    if (spline.cpNum > 1) {
+        
+        starBig.wTx = spline.line.vertexData[splinePosition * 5];
+        starBig.wTy = spline.line.vertexData[splinePosition * 5 + 1];
+        
+        if (splinePosition == (spline.cpNum) * 500 -1 ) splinePosition = 0;
+        splinePosition++;
+        
+        float dTime = 0.005;
+        for (float t = lastTime; t <= sec; t += dTime) {
+            starMiddle.NGravity(starBig, t);
+            starSmall.NGravity(starBig, t);
+            lastTime = sec;
+        }
+    }
+    
+    if (spacePressed) {
+        camera.wCx = starBig.wTx;
+        camera.wCy = starBig.wTy;
+        //printf("small.x: %f, small.y: %f", starSmall.wTx, starSmall.wTy);
+    }
+    
+    starBig.Animate(sec);
+    starMiddle.Animate(sec);
+    starSmall.Animate(sec);
+    
     glutPostRedisplay();					// redraw the scene
 }
 
