@@ -39,12 +39,6 @@
 
 #include <vector>
 
-//=============================================================================================
-#include <iostream>
-#include <fstream>
-using namespace std;
-//=============================================================================================
-
 #if defined(__APPLE__)
 #include <GLUT/GLUT.h>
 #include <OpenGL/gl3.h>
@@ -53,8 +47,8 @@ using namespace std;
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #include <windows.h>
 #endif
-#include <GL/glew.h>		// must be downloaded
-#include <GL/freeglut.h>	// must be downloaded unless you have an Apple
+#include <GL/glew.h>        // must be downloaded
+#include <GL/freeglut.h>    // must be downloaded unless you have an Apple
 #endif
 
 const unsigned int windowWidth = 600, windowHeight = 600;
@@ -102,15 +96,15 @@ const char *vertexSource = R"(
 #version 140
 precision highp float;
 
-uniform mat4 MVP;			// Model-View-Projection matrix in row-major format
+uniform mat4 MVP;            // Model-View-Projection matrix in row-major format
 
-in vec2 vertexPosition;		// variable input from Attrib Array selected by glBindAttribLocation
-in vec3 vertexColor;	    // variable input from Attrib Array selected by glBindAttribLocation
-out vec3 color;				// output attribute
+in vec2 vertexPosition;        // variable input from Attrib Array selected by glBindAttribLocation
+in vec3 vertexColor;        // variable input from Attrib Array selected by glBindAttribLocation
+out vec3 color;                // output attribute
 
 void main() {
-    color = vertexColor;														// copy color from input to output
-    gl_Position = vec4(vertexPosition.x, vertexPosition.y, 0, 1) * MVP; 		// transform to clipping space
+    color = vertexColor;                                                        // copy color from input to output
+    gl_Position = vec4(vertexPosition.x, vertexPosition.y, 0, 1) * MVP;         // transform to clipping space
 }
 )";
 
@@ -119,8 +113,8 @@ const char *fragmentSource = R"(
 #version 140
 precision highp float;
 
-in vec3 color;				// variable input: interpolated color of vertex shader
-out vec4 fragmentColor;		// output that goes to the raster memory as told by glBindFragDataLocation
+in vec3 color;                // variable input: interpolated color of vertex shader
+out vec4 fragmentColor;        // output that goes to the raster memory as told by glBindFragDataLocation
 
 void main() {
     fragmentColor = vec4(color, 1); // extend RGB to RGBA
@@ -191,8 +185,8 @@ struct vec4 {
 
 // 2D camera
 struct Camera {
-    float wCx, wCy;	// center in world coordinates
-    float wWx, wWy;	// width and height in world coordinates
+    float wCx, wCy;    // center in world coordinates
+    float wWx, wWy;    // width and height in world coordinates
 public:
     Camera() {
         Animate(0);
@@ -241,8 +235,8 @@ bool spacePressed = false;
 unsigned int shaderProgram;
 
 class Triangle {
-    unsigned int vao;	// vertex array object id
-    float wTx, wTy;		// translation
+    unsigned int vao;    // vertex array object id
+    float wTx, wTy;        // translation
     float sx, sy;
 public:
     
@@ -253,31 +247,31 @@ public:
     }
     
     void Create() {
-        glGenVertexArrays(1, &vao);	// create 1 vertex array object
-        glBindVertexArray(vao);		// make it active
+        glGenVertexArrays(1, &vao);    // create 1 vertex array object
+        glBindVertexArray(vao);        // make it active
         
-        unsigned int vbo[2];		// vertex buffer objects
-        glGenBuffers(2, &vbo[0]);	// Generate 2 vertex buffer objects
+        unsigned int vbo[2];        // vertex buffer objects
+        glGenBuffers(2, &vbo[0]);    // Generate 2 vertex buffer objects
         
         // vertex coordinates: vbo[0] -> Attrib Array 0 -> vertexPosition of the vertex shader
         glBindBuffer(GL_ARRAY_BUFFER, vbo[0]); // make it active, it is an array
-        static float vertexCoords[] = { -1.0f, -sqrtf(3.0f) / 3.0f, 1.0f, -sqrtf(3.0f) / 3.0f, -0.0f, 2 * sqrtf(3.0f) / 3.0f };	// vertex data on the CPU
+        static float vertexCoords[] = { -1.0f, -sqrtf(3.0f) / 3.0f, 1.0f, -sqrtf(3.0f) / 3.0f, -0.0f, 2 * sqrtf(3.0f) / 3.0f };    // vertex data on the CPU
         glBufferData(GL_ARRAY_BUFFER,      // copy to the GPU
                      sizeof(vertexCoords),  // number of the vbo in bytes
-                     vertexCoords,		   // address of the data array on the CPU
-                     GL_STATIC_DRAW);	   // copy to that part of the memory which is not modified
+                     vertexCoords,           // address of the data array on the CPU
+                     GL_STATIC_DRAW);       // copy to that part of the memory which is not modified
         // Map Attribute Array 0 to the current bound vertex buffer (vbo[0])
         glEnableVertexAttribArray(0);
         // Data organization of Attribute Array 0
-        glVertexAttribPointer(0,			// Attribute Array 0
+        glVertexAttribPointer(0,            // Attribute Array 0
                               2, GL_FLOAT,  // components/attribute, component type
-                              GL_FALSE,		// not in fixed point format, do not normalized
+                              GL_FALSE,        // not in fixed point format, do not normalized
                               0, NULL);     // stride and offset: it is tightly packed
         
-						  // vertex colors: vbo[1] -> Attrib Array 1 -> vertexColor of the vertex shader
+        // vertex colors: vbo[1] -> Attrib Array 1 -> vertexColor of the vertex shader
         glBindBuffer(GL_ARRAY_BUFFER, vbo[1]); // make it active, it is an array
-        float vertexColors[] = { color.v[0], color.v[1], color.v[2], color.v[0], color.v[1], color.v[2], color.v[0], color.v[1], color.v[2] };	// vertex data on the CPU
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColors), vertexColors, GL_STATIC_DRAW);	// copy to the GPU
+        float vertexColors[] = { color.v[0], color.v[1], color.v[2], color.v[0], color.v[1], color.v[2], color.v[0], color.v[1], color.v[2] };    // vertex data on the CPU
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertexColors), vertexColors, GL_STATIC_DRAW);    // copy to the GPU
         
         // Map Attribute Array 1 to the current bound vertex buffer (vbo[1])
         glEnableVertexAttribArray(1);  // Vertex position
@@ -319,8 +313,8 @@ public:
         if (location >= 0) glUniformMatrix4fv(location, 1, GL_TRUE, MVPTransform); // set uniform variable MVP to the MVPTransform
         else printf("uniform MVP cannot be set\n");
         
-        glBindVertexArray(vao);	// make the vao and its vbos active playing the role of the data source
-        glDrawArrays(GL_TRIANGLES, 0, 3);	// draw a single triangle with vertices defined in vao
+        glBindVertexArray(vao);    // make the vao and its vbos active playing the role of the data source
+        glDrawArrays(GL_TRIANGLES, 0, 3);    // draw a single triangle with vertices defined in vao
     }
 };
 
@@ -348,7 +342,6 @@ public:
     }
     
     void AddPoint(float cX, float cY) {
-        //printf("%f,    %f\n", cX, cY);
         if (nVertices >= 5500) return;
         
         vec4 wVertex = vec4(cX, cY, 0, 1) * camera.Pinv() * camera.Vinv();
@@ -389,7 +382,6 @@ public:
 class Star {
     Triangle triangles[3];
     float sx, sy;
-    int caught;
 public:
     float wTx, wTy;
     float mass;
@@ -400,7 +392,6 @@ public:
     void Create(float r, float g, float b, float mass, float pos) {
         
         this->mass = mass;
-        caught = 0;
         
         Triangle triangle1;
         Triangle triangle2;
@@ -424,7 +415,7 @@ public:
     }
     
     void Animate(float t) {
-        sx = 0.5f * sinf(t);
+        sx = mass/12.0f * sinf(t);
         sy = cosf(t);
     }
     
@@ -433,6 +424,13 @@ public:
         for (int i = 0; i < 3; i++) {
             triangles[i].Animate(i * 40);
         }
+    }
+    
+    float Friction(float F) {
+        float mu = ((F - (0.00001f * mass)) / F);
+        if(mu > 1.0f) mu = 1.0f;
+        
+        return (-1.0) * mu * F;
     }
     
     void NGravity(Star big, float t) {
@@ -446,22 +444,8 @@ public:
         }
         F = G * mass * big.mass / Rsqr;
         
-        vec4 velocity;
+        vec4 velocity = vec4((big.wTx - wTx) / sqrt(Rsqr), (big.wTy - wTy) / sqrt(Rsqr), 0.0, 1.0) * (F + Friction(F)) * t;
         
-        float mu = ((F - (0.00001f * mass)) / F);
-        if(mu > 1.0f) mu = 1.0f;
-        
-        printf("mu %f\n", mu);
-        velocity = vec4((big.wTx - wTx) / sqrt(Rsqr), (big.wTy - wTy) / sqrt(Rsqr), 0.0, 1.0) * (F + ((-1.0)*mu   * F )) * t;
-        
-        //printf("wTx:%f, wTx:%f\n", wTx, wTy);
-        //if(firstTime == 0) {
-//            float d0 = sqrt(pow((wTx - 0.0f), 2) + pow((wTy - 0.0f), 2));
-//            wTx = wTx/d0;
-//            wTy = wTy/d0;
-//            firstTime++;
-        //}
-                     
         wTx = wTx + velocity.v[0] * t;
         wTy = wTy + velocity.v[1] * t;
     }
@@ -505,7 +489,7 @@ public:
 class Spline {
 public:
     int cpNum;
-    ControllPoint cp_array[11];
+    ControllPoint cp_array[12];
     LineStrip line;
     
     
@@ -550,17 +534,19 @@ public:
     }
     
     void setSpeeds() {
-        //vec4 n(100.21f, 234.0f ,0.0f, 1.0f);
-        //vec4 n(-0.1529f, 0.3207f ,0.0f, 1.0f);
-        //	cp_array[0].speed = n;
-        //	cp_array[cpNum + 1].speed = n;
+        vec4 before, after;
         
-        for (int i = 0; i < cpNum + 1; i++) {
+        for (int i = 1; i < cpNum+1; i++) {
             
-            vec4 first = (p(i + 1) - p(i)) / (t(i + 1) - t(i));
-            vec4 next = (p(i) - p(i - 1)) / (t(i) - t(i - 1));
-            cp_array[i].speed = ((first + next) / 2.0f);
+            before = (p(i) - p(i - 1)) / (t(i) - t(i - 1));
+            after = (p(i + 1) - p(i)) / (t(i + 1) - t(i));
+            cp_array[i].speed = (before + after)* 0.9f;
         }
+        
+        before = (p(cpNum+1) - p(cpNum)) / (t(1) - t(cpNum));
+        after = (p(2) - p(cpNum+1)) / (t(2) - t(1));
+        cp_array[cpNum+1].speed = (before + after)* 0.9f;
+        
     }
     
     vec4 f(int i, float t) {
@@ -569,17 +555,6 @@ public:
         + a2(i) * pow(t - cp_array[i].time, 2)
         + a1(i) * (t - cp_array[i].time) + a0(i);
         
-        //r = r /10.0f;
-        //printf("vector: x: %f, y: %f\n", r.v[0], r.v[1]);
-        
-        return r;
-    }
-    
-    vec4 d(int i, float t) {
-        
-        vec4 r = a3(i) * 3.0f * pow(t - cp_array[i].time, 2)
-        + a2(i) * 2.0f *  (t - cp_array[i].time) + a1(i);
-        
         return r;
     }
     
@@ -587,29 +562,31 @@ public:
         
         float step = 0.0f;
         
-        cp_array[cpNum + 1] = ControllPoint(cp_array[0].center, cp_array[cpNum].time+500.0f);
-        setSpeeds();
-        
-        line.Clear_data();
-        for (int j = 0; j < cpNum+1; j++) {
-            step = (cp_array[j+1].time - cp_array[j].time) / 500.0f;
+        if (cpNum > 1) {
+            cp_array[cpNum + 1] = ControllPoint(cp_array[1].center, cp_array[cpNum].time+500.0f);
+            cp_array[0] = cp_array[cpNum];
+            setSpeeds();
             
-            
-            for (int i = 0; i < 500; i++) {
+            line.Clear_data();
+            for (int j = 1; j < cpNum+1; j++) {
+                step = (cp_array[j+1].time - cp_array[j].time) / 500.0f;
                 
-                vec4 v = f(j, cp_array[j].time + i * step);
-                line.AddPoint(v.v[0] + camera.wCx, v.v[1] + camera.wCy);
+                
+                for (int i = 0; i < 500; i++) {
+                    
+                    vec4 v = f(j, cp_array[j].time + i * step);
+                    line.AddPoint(v.v[0], v.v[1]);
+                }
                 
             }
-            
-        }        
+        }
     }
     
 };
 
 // The virtual world: collection of two objects
 ControllPoint cp;
-Spline spline(0);
+Spline spline(1);
 LineStrip lineStrip;
 
 Star starBig;
@@ -661,7 +638,7 @@ void onInitialization() {
     glBindAttribLocation(shaderProgram, 1, "vertexColor");    // vertexColor gets values from Attrib Array 1
     
     // Connect the fragmentColor to the frame buffer memory
-    glBindFragDataLocation(shaderProgram, 0, "fragmentColor");	// fragmentColor goes to the frame buffer memory
+    glBindFragDataLocation(shaderProgram, 0, "fragmentColor");    // fragmentColor goes to the frame buffer memory
     
     // program packaging
     glLinkProgram(shaderProgram);
@@ -677,26 +654,21 @@ void onExit() {
 
 // Window has become invalid: Redraw
 void onDisplay() {
-    glClearColor(0, 0, 0, 0);							// background color
+    glClearColor(0, 0, 0, 0);                            // background color
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the screen
-
+    
     //lineStrip.Draw();
     spline.line.Draw();
     starBig.Draw(0.0f);
     starMiddle.Draw(2.0f);
     starSmall.Draw(-3.0f);
     
-    glutSwapBuffers();									// exchange the two buffers
+    glutSwapBuffers();                                    // exchange the two buffers
 }
 
 // Key of ASCII code pressed
 void onKeyboard(unsigned char key, int pX, int pY) {
     if (key == 'd') glutPostRedisplay();         // if d, invalidate display, i.e. redraw
-    if (key == 's') {
-        for (int i = 0; i < spline.cpNum + 1; i++) {
-            printf("cp:  x:%f, y:%f time:%f\n", spline.cp_array[i].center.v[0], spline.cp_array[i].center.v[1], spline.cp_array[i].time);
-        }
-    }
     if (key == ' ') {
         if (spacePressed == false)
             spacePressed = true;
@@ -712,10 +684,10 @@ void onKeyboardUp(unsigned char key, int pX, int pY) {
 void onMouse(int button, int state, int pX, int pY) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {  // GLUT_LEFT_BUTTON / GLUT_RIGHT_BUTTON and GLUT_DOWN / GLUT_UP
         
-        float cX = 2.0f * pX / windowWidth - 1;	// flip y axis
+        float cX = 2.0f * pX / windowWidth - 1;    // flip y axis
         float cY = 1.0f - 2.0f * pY / windowHeight;
         
-        if (spline.cpNum <= 10) {
+        if (spline.cpNum < 11 && !spacePressed) {
             
             //lineStrip.AddPoint(cX, cY);
             
@@ -725,7 +697,7 @@ void onMouse(int button, int state, int pX, int pY) {
             
             spline.cp_array[spline.cpNum] = ControllPoint(center, t);
             
-            if (spline.cpNum > 0) {
+            if (spline.cpNum > 2) {
                 spline.createLine();
             }
             spline.cpNum = spline.cpNum + 1;
@@ -745,8 +717,8 @@ float lastTime = 0;
 // Idle event indicating that some time elapsed: do animation here
 void onIdle() {
     long time = glutGet(GLUT_ELAPSED_TIME); // elapsed time since the start of the program
-    float sec = time / 1000.0f;				// convert msec to sec
-    camera.Animate(sec);					// animate the camera
+    float sec = time / 1000.0f;                // convert msec to sec
+    camera.Animate(sec);                    // animate the camera
     
     starBig.AnimateTriangles();
     starMiddle.AnimateTriangles();
@@ -757,7 +729,7 @@ void onIdle() {
         starBig.wTx = spline.line.vertexData[splinePosition * 5];
         starBig.wTy = spline.line.vertexData[splinePosition * 5 + 1];
         
-        if (splinePosition == (spline.cpNum) * 500 -1 ) splinePosition = 0;
+        if (splinePosition == (spline.cpNum -1 ) * 500 - 1 ) splinePosition = 0;
         splinePosition++;
         
         float dTime = 0.005;
@@ -771,14 +743,13 @@ void onIdle() {
     if (spacePressed) {
         camera.wCx = starBig.wTx;
         camera.wCy = starBig.wTy;
-        //printf("small.x: %f, small.y: %f", starSmall.wTx, starSmall.wTy);
     }
     
     starBig.Animate(sec);
     starMiddle.Animate(sec);
     starSmall.Animate(sec);
     
-    glutPostRedisplay();					// redraw the scene
+    glutPostRedisplay();                    // redraw the scene
 }
 
 // Idaig modosithatod...
@@ -789,8 +760,8 @@ int main(int argc, char * argv[]) {
 #if !defined(__APPLE__)
     glutInitContextVersion(majorVersion, minorVersion);
 #endif
-    glutInitWindowSize(windowWidth, windowHeight);				// Application window is initially of resolution 600x600
-    glutInitWindowPosition(100, 100);							// Relative location of the application window
+    glutInitWindowSize(windowWidth, windowHeight);                // Application window is initially of resolution 600x600
+    glutInitWindowPosition(100, 100);                            // Relative location of the application window
 #if defined(__APPLE__)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_3_2_CORE_PROFILE);  // 8 bit R,G,B,A + double buffer + depth buffer
 #else
@@ -799,7 +770,7 @@ int main(int argc, char * argv[]) {
     glutCreateWindow(argv[0]);
     
 #if !defined(__APPLE__)
-    glewExperimental = true;	// magic
+    glewExperimental = true;    // magic
     glewInit();
 #endif
     
