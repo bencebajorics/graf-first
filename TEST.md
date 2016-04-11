@@ -8,7 +8,7 @@ Version: 0.13.1
 
 ## Paths
 ### GET /all
-#### Starts the processing of the statistics of each sites, and puts them into an SQS queue
+##### Starts the processing of the statistics of each sites, and puts them into an SQS queue
 ```
 GET /all
 ```
