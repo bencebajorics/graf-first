@@ -382,10 +382,8 @@ IntercomService.post('/push/plugin_activated', {
 
 * GhostMonitor Usage
 
-### Push segment informations about plugin_deactivated to Intercom api
-```
-POST /push/plugin_deactivated
-```
+### POST /push/plugin_deactivated
+##### Push segment informations about plugin_deactivated to Intercom api
 
 #### Description
 
@@ -416,10 +414,8 @@ IntercomService.post('/push/plugin_deactivated', {
 
 * GhostMonitor Usage
 
-### Push segment informations about signup_ended to Intercom api
-```
-POST /push/signup_ended
-```
+### POST /push/signup_ended
+##### Push segment informations about signup_ended to Intercom api
 
 #### Description
 
@@ -454,10 +450,8 @@ IntercomService.post('/push/platform', {
 
 * Signup
 
-### Push segment informations about signup_started to Intercom api
-```
-POST /push/signup_started
-```
+### POST /push/signup_started
+##### Push segment informations about signup_started to Intercom api
 
 #### Description
 
@@ -490,10 +484,8 @@ IntercomService.post('/push/signup_started', {
 
 * Signup
 
-### Push segment informations about statistics to Intercom api
-```
-POST /push/statistics
-```
+### POST /push/statistics
+##### Push segment informations about statistics to Intercom api
 
 #### Description
 
@@ -516,10 +508,8 @@ The /push/statistics endpoint adds all statistical information to the Intercom a
 
 * GhostMonitor Statistics
 
-### Push segment informations about wizard_page_1 to Intercom api
-```
-POST /push/wizard_page_1
-```
+### POST /push/wizard_page_1
+##### Push segment informations about wizard_page_1 to Intercom api
 
 #### Description
 
@@ -550,10 +540,8 @@ Example call:
 
 * Signup
 
-### Push segment informations about wizard_page_2 to Intercom api
-```
-POST /push/wizard_page_2
-```
+### POST /push/wizard_page_2
+##### Push segment informations about wizard_page_2 to Intercom api
 
 #### Description
 
@@ -584,10 +572,8 @@ Example call:
 
 * Signup
 
-### Push segment informations about wizard_page_3 to Intercom api
-```
-POST /push/wizard_page_3
-```
+### POST /push/wizard_page_3
+##### Push segment informations about wizard_page_3 to Intercom api
 
 #### Description
 
