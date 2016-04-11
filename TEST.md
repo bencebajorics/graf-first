@@ -19,6 +19,7 @@ Version: 0.13.1
 #### Tags
 
 * Get
+
 ###POST /push/account_cancelled
 ##### Push segment informations about trial_expired to Intercom api
 
@@ -51,6 +52,7 @@ IntercomService.post('/push/account_cancelled', {
 #### Tags
 
 * GhostMonitor Usage
+
 ###POST /push/cart_recovered
 ##### Push segment informations about cart_recovered to Intercom api
 
@@ -83,6 +85,7 @@ IntercomService.post('/push/cart_recovered', {
 #### Tags
 
 * GhostMonitor Statistics
+
 ###POST /push/days_left
 ##### Push segment informations about trial_expired to Intercom api
 
@@ -115,6 +118,7 @@ IntercomService.post('/push/trial_expired', {
 #### Tags
 
 * GhostMonitor Usage
+
 ###POST /push/emails_sent
 ##### Push segment informations about emails_sent to Intercom api
 
@@ -147,6 +151,7 @@ IntercomService.post('/push/emails_sent', {
 #### Tags
 
 * GhostMonitor Statistics
+
 ###POST /push/first_customer_ghost
 ##### Push segment informations about first_ghost to Intercom api
 
@@ -181,6 +186,7 @@ IntercomService.post('/push/first_customer_ghost', {
 #### Tags
 
 * GhostMonitor Statistics
+
 ###POST /push/first_entered
 ##### Push segment informations about first_entered to Intercom api
 
@@ -212,6 +218,7 @@ Example call:
 #### Tags
 
 * GhostMonitor Usage
+
 ### POST /push/first_ghost
 ##### Push segment informations about first_ghost to Intercom api
 
@@ -245,6 +252,7 @@ IntercomService.post('/push/first_customer_ghost', {
 #### Tags
 
 * GhostMonitor Statistics
+
 ### POST /push/money_recovered
 ##### Push segment informations about money_recovered to Intercom api
 
@@ -277,6 +285,7 @@ IntercomService.post('/push/money_recovered', {
 #### Tags
 
 * GhostMonitor Statistics
+
 ### POST /push/payment_activated
 ##### Push segment informations about payment_activated to Intercom api
 
@@ -308,6 +317,7 @@ IntercomService.post('/push/payment_activated', {
 #### Tags
 
 * GhostMonitor Usage
+
 ### POST /push/payment_deactivated
 ##### Push segment informations about payment_deactivated to Intercom api
 
@@ -340,10 +350,8 @@ IntercomService.post('/push/payment_deactivated', {
 
 * GhostMonitor Usage
 
-### Push segment informations about plugin_activated to Intercom api
-```
-POST /push/plugin_activated
-```
+### POST /push/plugin_activated
+##### Push segment informations about plugin_activated to Intercom api
 
 #### Description
 
