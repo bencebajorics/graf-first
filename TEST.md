@@ -7,7 +7,8 @@ Service with controlling intercom requests functionality.
 Version: 0.13.1
 
 ## Paths
-### Starts the processing of the statistics of each sites, and puts them into an SQS queue
+### GET /all
+#### Starts the processing of the statistics of each sites, and puts them into an SQS queue
 ```
 GET /all
 ```
@@ -22,9 +23,7 @@ GET /all
 
 * Get
 
-##/push/account_cancelled
-
-#### Push segment informations about trial_expired to Intercom api
+### Push segment informations about trial_expired to Intercom api
 ```
 POST /push/account_cancelled
 ```
