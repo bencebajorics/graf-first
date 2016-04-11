@@ -19,11 +19,8 @@ Version: 0.13.1
 #### Tags
 
 * Get
-
-### Push segment informations about trial_expired to Intercom api
-```
-POST /push/account_cancelled
-```
+###POST /push/account_cancelled
+##### Push segment informations about trial_expired to Intercom api
 
 #### Description
 
@@ -54,11 +51,9 @@ IntercomService.post('/push/account_cancelled', {
 #### Tags
 
 * GhostMonitor Usage
+###POST /push/cart_recovered
+##### Push segment informations about cart_recovered to Intercom api
 
-### Push segment informations about cart_recovered to Intercom api
-```
-POST /push/cart_recovered
-```
 
 #### Description
 
@@ -88,11 +83,8 @@ IntercomService.post('/push/cart_recovered', {
 #### Tags
 
 * GhostMonitor Statistics
-
-### Push segment informations about trial_expired to Intercom api
-```
-POST /push/days_left
-```
+###POST /push/days_left
+##### Push segment informations about trial_expired to Intercom api
 
 #### Description
 
@@ -123,11 +115,8 @@ IntercomService.post('/push/trial_expired', {
 #### Tags
 
 * GhostMonitor Usage
-
-### Push segment informations about emails_sent to Intercom api
-```
-POST /push/emails_sent
-```
+###POST /push/emails_sent
+##### Push segment informations about emails_sent to Intercom api
 
 #### Description
 
@@ -158,11 +147,8 @@ IntercomService.post('/push/emails_sent', {
 #### Tags
 
 * GhostMonitor Statistics
-
-### Push segment informations about first_ghost to Intercom api
-```
-POST /push/first_customer_ghost
-```
+###POST /push/first_customer_ghost
+##### Push segment informations about first_ghost to Intercom api
 
 #### Description
 
@@ -195,11 +181,8 @@ IntercomService.post('/push/first_customer_ghost', {
 #### Tags
 
 * GhostMonitor Statistics
-
-### Push segment informations about first_entered to Intercom api
-```
-POST /push/first_entered
-```
+###POST /push/first_entered
+##### Push segment informations about first_entered to Intercom api
 
 #### Description
 
@@ -229,11 +212,8 @@ Example call:
 #### Tags
 
 * GhostMonitor Usage
-
-### Push segment informations about first_ghost to Intercom api
-```
-POST /push/first_ghost
-```
+### POST /push/first_ghost
+##### Push segment informations about first_ghost to Intercom api
 
 #### Description
 
@@ -265,11 +245,8 @@ IntercomService.post('/push/first_customer_ghost', {
 #### Tags
 
 * GhostMonitor Statistics
-
-### Push segment informations about money_recovered to Intercom api
-```
-POST /push/money_recovered
-```
+### POST /push/money_recovered
+##### Push segment informations about money_recovered to Intercom api
 
 #### Description
 
@@ -300,11 +277,8 @@ IntercomService.post('/push/money_recovered', {
 #### Tags
 
 * GhostMonitor Statistics
-
-### Push segment informations about payment_activated to Intercom api
-```
-POST /push/payment_activated
-```
+### POST /push/payment_activated
+##### Push segment informations about payment_activated to Intercom api
 
 #### Description
 
@@ -334,11 +308,8 @@ IntercomService.post('/push/payment_activated', {
 #### Tags
 
 * GhostMonitor Usage
-
-### Push segment informations about payment_deactivated to Intercom api
-```
-POST /push/payment_deactivated
-```
+### POST /push/payment_deactivated
+##### Push segment informations about payment_deactivated to Intercom api
 
 #### Description
 
