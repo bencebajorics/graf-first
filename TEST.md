@@ -22,6 +22,8 @@ GET /all
 
 * Get
 
+#/push/account_cancelled
+
 ### Push segment informations about trial_expired to Intercom api
 ```
 POST /push/account_cancelled
