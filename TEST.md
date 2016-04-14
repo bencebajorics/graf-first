@@ -7,10 +7,9 @@ The Service provides statistical information about the ghost sessions of pages u
 Version: 0.5.1
 
 ## Paths
-### Returns 'OK' to show that the service is working
-```
-GET /__healthy
-```
+
+### GET /__healthy
+##### Returns 'OK' to show that the service is working
 
 #### Description
 
@@ -27,10 +26,8 @@ The /__healthy endpoint gives back 'OK' with code 200, to enable the user to che
 
 * Get
 
-### Gives the number of active sites, and the users status on these sites
-```
-GET /activeSites
-```
+### GET /activeSites
+##### Gives the number of active sites, and the users status on these sites
 
 #### Description
 
@@ -63,10 +60,8 @@ Session.get('/activeSites', {
 
 * Get
 
-### Counts the model elements in the database
-```
-GET /count
-```
+### GET /count
+##### Counts the model elements in the database
 
 #### Description
 
@@ -84,10 +79,8 @@ The /count endpoint gives back the number of service model elements in the datab
 
 * Get
 
-### Gives the recovery data to fill a diagram
-```
-GET /diagram
-```
+### GET /diagram
+##### Gives the recovery data to fill a diagram
 
 #### Description
 
@@ -122,10 +115,8 @@ Session.get('/diagram', {
 
 * Get
 
-### Gives statistical information about ATC popup
-```
-GET /emailAcquireTypes
-```
+### GET /emailAcquireTypes
+##### Gives statistical information about ATC popup
 
 #### Description
 
@@ -160,10 +151,8 @@ Session.get('/emailAcquireTypes', {
 
 * Get
 
-### Gives back the session details of the ghosts.
-```
-GET /ghosts
-```
+### GET /ghosts
+##### Gives back the session details of the ghosts.
 
 #### Description
 
@@ -204,10 +193,8 @@ Session.get('/ghosts', {
 
 * Get
 
-### Search database for all the service model elements
-```
-GET /rest
-```
+### GET /rest
+##### Search database for all the service model elements
 
 #### Description
 
@@ -225,10 +212,8 @@ The /rest get endpoint gives back the service model elements from the database. 
 
 * Get
 
-### Creates a new model element with the data object given as body parameter
-```
-POST /rest
-```
+### POST /rest
+##### Creates a new model element with the data object given as body parameter
 
 #### Description
 
@@ -252,10 +237,8 @@ The /rest post endpoint creates and adds a new element to the database, in form 
 
 * Post
 
-### Search in database and update one service model element
-```
-PATCH /rest
-```
+### PATCH /rest
+##### Search in database and update one service model element
 
 #### Description
 
@@ -273,10 +256,8 @@ The /rest patch endpoint find and update one service model element from the data
 
 * Patch
 
-### Find and update an element
-```
-PUT /rest/{id}
-```
+### PUT /rest/{id}
+##### Find and update an element
 
 #### Description
 
@@ -301,10 +282,8 @@ The /rest/:id put endpoint search and then update a model element with the ID ma
 
 * Put
 
-### Search database for a particular service model element
-```
-GET /rest/{id}
-```
+### GET /rest/{id}
+##### Search database for a particular service model element
 
 #### Description
 
@@ -333,10 +312,8 @@ The /rest/:id get endpoint gives back the service model element with matching ID
 
 * Get
 
-### Delete a particular service model element
-```
-DELETE /rest/{id}
-```
+### DELETE /rest/{id}
+##### Delete a particular service model element
 
 #### Description
 
@@ -365,10 +342,8 @@ The /rest/:id delete endpoint search and then delete a model element with the ID
 
 * Delete
 
-### Gives the number of users in different status on all the pages
-```
-GET /sessionStat
-```
+### GET /sessionStat
+##### Gives the number of users in different status on all the pages
 
 #### Description
 
@@ -401,10 +376,8 @@ Session.get('/sessionStat', {
 
 * Get
 
-### Push informations about a cart item
-```
-POST /setCartItem
-```
+### POST /setCartItem
+##### Push informations about a cart item
 
 #### Description
 
@@ -441,10 +414,8 @@ Session.post('/setCartItem', {
 
 * Post
 
-### Gives statistical information GhostMonitor uses
-```
-GET /statistics
-```
+### GET /statistics
+##### Gives statistical information GhostMonitor uses
 
 #### Description
 
@@ -479,10 +450,8 @@ Session.get('/statistics', {
 
 * Get
 
-### Synchronize model elements
-```
-POST /synchronize
-```
+### POST /synchronize
+##### Synchronize model elements
 
 #### Description
 
@@ -505,10 +474,8 @@ The /synchronize endpoint prepares the Cart Items for Elasticsearch. The object'
 
 * Post
 
-### Shows the version number
-```
-GET /version
-```
+### GET /version
+##### Shows the version number
 
 #### Description
 
@@ -646,5 +613,3 @@ The /version endpoint gives back version number of the current service.
 |atc||false|ATC||
 |shopifyCartId||false|string||
 |shopify||false|object||
-
-
