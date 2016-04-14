@@ -1,71 +1,46 @@
-# Intercom service
+# Session Model Service
 
 ## Overview
-Service with controlling intercom requests functionality.
+The Service provides statistical information about the ghost sessions of pages using GhostMonitor.
 
 ### Version information
-Version: 0.13.1
+Version: 0.5.1
 
 ## Paths
-### GET /all
-##### Starts the processing of the statistics of each sites, and puts them into an SQS queue
+### Returns 'OK' to show that the service is working
+```
+GET /__healthy
+```
+
+#### Description
+
+The /__healthy endpoint gives back 'OK' with code 200, to enable the user to check whether the service is working or not.
+
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|Expected response to a valid request|Response_ok|
+|200|An 'OK' answer.|string|
 
 
 #### Tags
 
 * Get
 
-###POST /push/account_cancelled
-##### Push segment informations about trial_expired to Intercom api
+### Gives the number of active sites, and the users status on these sites
+```
+GET /activeSites
+```
 
 #### Description
 
-The /push/account_cancelled endpoint adds the date when a users account had been cancelled, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /activeSites endpoint gives back a Json object with the number of active sites, and the summary of visitors in different states from GhostMonitor's perspective. These numbers are from a certain time interval, which is given as query parameter. The object's schema is described at the end in the Definitions section.
 
 Example call:
 ```
-IntercomService.post('/push/account_cancelled', {
-  site_id: '12312312313',
-  account_cancelled: 'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
-})
-
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Account_cancelled||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_account_cancelled|
-
-
-#### Tags
-
-* GhostMonitor Usage
-
-###POST /push/cart_recovered
-##### Push segment informations about cart_recovered to Intercom api
-
-
-#### Description
-
-The /push/cart_recovered endpoint adds information about how many carts had been recovered to the user's site, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-Example call:
-```
-IntercomService.post('/push/cart_recovered', {
-  site_id: '12312312313',
-  cart_recovered: '25',
+Session.get('/activeSites', {
+  end:  'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
+  start: 'Thu Feb 18 2016 12:25:45 GMT+0100 (CET)'
 })
 ```
 
@@ -73,791 +48,603 @@ IntercomService.post('/push/cart_recovered', {
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Cart_recovered||
+|QueryParameter|end|The end date of the given interval of time.|true|string||
+|QueryParameter|start|The start date of the given interval of time.|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_cart_recovered|
+|200|The returned statistic elements in a Json object.|Response_activeSites|
+|400|Returned error message if a parameter is required.|Response_400|
 
 
 #### Tags
 
-* GhostMonitor Statistics
+* Get
 
-###POST /push/days_left
-##### Push segment informations about trial_expired to Intercom api
+### Counts the model elements in the database
+```
+GET /count
+```
 
 #### Description
 
-The /push/trial_expired endpoint adds the number of days left from the trial period, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /count endpoint gives back the number of service model elements in the database. The object's schema is described at the end in the Definitions section.
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The number of elements.|integer|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Get
+
+### Gives the recovery data to fill a diagram
+```
+GET /diagram
+```
+
+#### Description
+
+The /diagram endpoint gives back an array filled with dates given as timestamps, and recovered money amounts paired up. These pairs are used as data of a diagram. The object's schema is described at the end in the Definitions section.
 
 Example call:
 ```
-IntercomService.post('/push/trial_expired', {
+Session.get('/diagram', {
   site_id: '12312312313',
-  trial_days_left: 'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
+  end:  'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
+  start: 'Thu Feb 18 2016 12:25:45 GMT+0100 (CET)'
 })
-
 ```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Days_left||
+|QueryParameter|site_id|The ID of the site you want to get informations about.|true|string||
+|QueryParameter|end|The end date of the interval of time.|true|string||
+|QueryParameter|start|The start date of the interval of time.|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_days_left|
+|200|The returned statistic elements in a Json object.|Response_diagram|
+|400|Returned error message if a parameter is required.|Response_400_2|
 
 
 #### Tags
 
-* GhostMonitor Usage
+* Get
 
-###POST /push/emails_sent
-##### Push segment informations about emails_sent to Intercom api
+### Gives statistical information about ATC popup
+```
+GET /emailAcquireTypes
+```
 
 #### Description
 
-The /push/emails_sent endpoint adds information about how many emails had been sent to the user's customers, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /emailAcquireTypes endpoint gives back a Json object with information about GhostMonitors ATC popup usage. These numbers are from a certain time interval, which is given as query parameter. The object's schema is described at the end in the Definitions section.
 
 Example call:
 ```
-IntercomService.post('/push/emails_sent', {
+Session.get('/emailAcquireTypes', {
   site_id: '12312312313',
-  emails_sent: '32',
+  end:  'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
+  start: 'Thu Feb 18 2016 12:25:45 GMT+0100 (CET)'
 })
-
 ```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Emails_sent||
+|QueryParameter|site_id|The ID of the site you want to get informations about.|true|string||
+|QueryParameter|end|The end date of the given interval of time.|true|string||
+|QueryParameter|start|The start date of the given interval of time.|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_emails_sent|
+|200|The returned statistic elements in a Json object.|Response_emailAcquireTypes|
+|400|Returned error message if a parameter is required.|Response_400|
 
 
 #### Tags
 
-* GhostMonitor Statistics
+* Get
 
-###POST /push/first_customer_ghost
-##### Push segment informations about first_ghost to Intercom api
+### Gives back the session details of the ghosts.
+```
+GET /ghosts
+```
 
 #### Description
 
-The /push/first_customer_ghost endpoint adds the email address of the first returned ghost, and the number and value of items the ghost customer purchased to the Intercom, in an object with 4 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /ghosts endpoint gives back a Json object with the number of ghosts, and the session statistics of each ghost. The number, sort, and order of the returned ghosts can be set in query parameters. The object's schema is described at the end in the Definitions section.
 
 Example call:
 ```
-IntercomService.post('/push/first_customer_ghost', {
+Session.get('/ghosts', {
   site_id: '12312312313',
-  first_customer_ghost_total: '32',
-  first_customer_ghost_item_count: '32'
-  first_customer_ghost_email: 'john@doe.com'
+  type: 'ghost',
+  skip: 100,
+  limit: 300,
+  sort: 50,
+  order: 1
 })
-
 ```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 4 parameters.|true|First_customer_ghost||
+|QueryParameter|site|The identifier of the site, you want to get the information about.|true|string||
+|QueryParameter|type|The type of sessions you are looking for.|true|string||
+|QueryParameter|skip|The number of ghosts you want to skip from the begining of the list of ghosts.|true|string||
+|QueryParameter|limit|The total number of ghosts you want to get.|true|string||
+|QueryParameter|sort|The number of ghosts in one array.|true|string||
+|QueryParameter|order|The order of returned ghosts in one array.|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_first_customer_ghost|
+|200|The returned statistic elements in a Json object.|Response_ghosts|
+|400|Returned error message if a parameter is required.|Response_400_2|
 
 
 #### Tags
 
-* GhostMonitor Statistics
+* Get
 
-###POST /push/first_entered
-##### Push segment informations about first_entered to Intercom api
+### Search database for all the service model elements
+```
+GET /rest
+```
 
 #### Description
 
-The /push/first_entered endpoint adds the date when a certain user first enterd the site to the Intercom, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /rest get endpoint gives back the service model elements from the database. The object's schema is described at the end in the Definitions section.
 
-Example call:
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The returned model elements.|SessionSchema array|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Get
+
+### Creates a new model element with the data object given as body parameter
 ```
-  IntercomService.post('/push/first_entered', {
-    site_id: '12312312313',
-    first_entered: 'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)',
-  })
+POST /rest
+```
+
+#### Description
+
+The /rest post endpoint creates and adds a new element to the database, in form of a SessionSchema. The object's schema is described at the end in the Definitions section.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|BodyParameter||The expected object.|true|SessionSchema||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|201|The response is 'ok', if everything went well.|string|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Post
+
+### Search in database and update one service model element
+```
+PATCH /rest
+```
+
+#### Description
+
+The /rest patch endpoint find and update one service model element from the database. The element is determined by an array's first object. In the secound object of the array, you give the parameters you want to change. The object's schema is described at the end in the Definitions section.
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The updated model elements.|SessionSchema array|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Patch
+
+### Find and update an element
+```
+PUT /rest/{id}
+```
+
+#### Description
+
+The /rest/:id put endpoint search and then update a model element with the ID matching the path parameter. The updated object's schema is described at the end in the Definitions section.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|PathParameter|id|The ID of the element you want to delete|true|string||
+|BodyParameter||The expected object with all required parameters.|true|SessionSchema||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The updated model element.|SessionSchema|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Put
+
+### Search database for a particular service model element
+```
+GET /rest/{id}
+```
+
+#### Description
+
+The /rest/:id get endpoint gives back the service model element with matching ID from the database. The object's schema is described at the end in the Definitions section.
+
+  Example call:
+  ```
+  Session.get('/rest/12312312313')
   ```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|First_entered||
+|PathParameter|id|The ID of the element you want to get|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_first_entered|
+|200|The returned model element.|SessionSchema|
+|400|Validation error by MongoDB.|MongoDB_Error|
 
 
 #### Tags
 
-* GhostMonitor Usage
+* Get
 
-### POST /push/first_ghost
-##### Push segment informations about first_ghost to Intercom api
+### Delete a particular service model element
+```
+DELETE /rest/{id}
+```
 
 #### Description
 
-The /push/first_ghost endpoint adds the number and value of items the first ghost wanted to buy, and also the email address of the ghost, in an object with 4 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-Example call:
-```
-IntercomService.post('/push/first_customer_ghost', {
-  site_id: '12312312313',
-  first_ghost_total: '32',
-  first_ghost_item_count: '32'
-  first_ghost_email: 'john@doe.com'
-})
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 4 parameters.|true|First_ghost||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_first_ghost|
-
-
-#### Tags
-
-* GhostMonitor Statistics
-
-### POST /push/money_recovered
-##### Push segment informations about money_recovered to Intercom api
-
-#### Description
-
-The /push/money_recovered endpoint adds information about how much money was recovered to the user, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-Example call:
-```
-IntercomService.post('/push/money_recovered', {
-  site_id: '12312312313',
-  money_recovered: '$ 5000',
-})
-
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Money_recovered||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_money_recovered|
-
-
-#### Tags
-
-* GhostMonitor Statistics
-
-### POST /push/payment_activated
-##### Push segment informations about payment_activated to Intercom api
-
-#### Description
-
-The /push/payment_activated endpoint adds information about the status of the payment to the Intercom, in an object with the site ID given in the body.
-
-Example call:
-```
-IntercomService.post('/push/payment_activated', {
-  site_id: '12312312313'
-})
-
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 1 parameter.|true|Payment||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_payment|
-
-
-#### Tags
-
-* GhostMonitor Usage
-
-### POST /push/payment_deactivated
-##### Push segment informations about payment_deactivated to Intercom api
-
-#### Description
-
-The /push/payment_deactivated endpoint adds information about the status of the payment to the Intercom, in an object with the site ID given in the body.
-
-Example call:
-```
-IntercomService.post('/push/payment_deactivated', {
-  site_id: '12312312313'
-})
-
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 1 parameter.|true|Payment||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_payment|
-
-
-#### Tags
-
-* GhostMonitor Usage
-
-### POST /push/plugin_activated
-##### Push segment informations about plugin_activated to Intercom api
-
-#### Description
-
-The /push/plugin_activated endpoint adds information about the status of the plugin to the Intercom, in an object with the site ID given in the body.
-
-Example call:
-```
-IntercomService.post('/push/plugin_activated', {
-  site_id: '12312312313'
-})
-
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 1 parameter.|true|Plugin||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_plugin|
-
-
-#### Tags
-
-* GhostMonitor Usage
-
-### POST /push/plugin_deactivated
-##### Push segment informations about plugin_deactivated to Intercom api
-
-#### Description
-
-The /push/plugin_activated endpoint adds information about the status of the plugin to the Intercom, in an object with the site ID given in the body.
-
-Example call:
-```
-IntercomService.post('/push/plugin_deactivated', {
-  site_id: '12312312313'
-})
-
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 1 parameter.|true|Plugin||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_plugin|
-
-
-#### Tags
-
-* GhostMonitor Usage
-
-### POST /push/signup_ended
-##### Push segment informations about signup_ended to Intercom api
-
-#### Description
-
-The /push/signup_ended endpoint adds the name, and the email address of a new user, the platform of the user's site, the duration of the registration, and the date when the user finished the sign up to the Intercom. The details are added in an object with 6 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-Example call:
-```
-IntercomService.post('/push/platform', {
-  site_id: '12312312313',
-  name: 'John Doe',
-  platform: 'WooCommerce'
-  sender_email: 'john@doe.com'
-  time_spent_on_registration: '5m35s',
-  signup_ended: 'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)',
-})
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with the 6 parameters.|true|Signup_ended||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_signup_end|
-
-
-#### Tags
-
-* Signup
-
-### POST /push/signup_started
-##### Push segment informations about signup_started to Intercom api
-
-#### Description
-
-The /push/signup_started endpoint adds the email address, and the site domain of a new user, and also the date when the user started its sign up to the Intercom. The details are added in an object with 4 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-Example call:
-```
-IntercomService.post('/push/signup_started', {
-  site_id: '12312312313',
-  email: 'john@doe.com',
-  domain: 'http://john-doe.com',
-  signup_started: 'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
-})
-```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 4 parameters.|true|Signup_started||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_signup_start|
-
-
-#### Tags
-
-* Signup
-
-### POST /push/statistics
-##### Push segment informations about statistics to Intercom api
-
-#### Description
-
-The /push/statistics endpoint adds all statistical information to the Intercom api, in an object with 18 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 18 parameters.|true|Statistics||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_statistics|
-
-
-#### Tags
-
-* GhostMonitor Statistics
-
-### POST /push/wizard_page_1
-##### Push segment informations about wizard_page_1 to Intercom api
-
-#### Description
-
-The /push/wizard_page_1 endpoint adds information about how much time a certain user spent on filling the sign up wizard's first page to the Intercom, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
-
-Example call:
-```
-  IntercomService.post('/push/platform', {
-    site_id: '12312312313',
-    wizard_page_1: '23.2',
-  })
+The /rest/:id delete endpoint search and then delete a model element with the ID matching the path parameter. The deleted object's schema is described at the end in the Definitions section.
+
+  Example call:
+  ```
+  Session.delete('/rest/12312312313')
   ```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Wizard_page_1||
+|PathParameter|id|The ID of the element you want to delete|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_wizard1|
+|200|The deleted model element.|SessionSchema|
+|400|Validation error by MongoDB.|MongoDB_Error|
 
 
 #### Tags
 
-* Signup
+* Delete
 
-### POST /push/wizard_page_2
-##### Push segment informations about wizard_page_2 to Intercom api
+### Gives the number of users in different status on all the pages
+```
+GET /sessionStat
+```
 
 #### Description
 
-The /push/wizard_page_2 endpoint adds information about how much time a certain user spent on filling the sign up wizard's second page to the Intercom, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /sessionStat endpoint gives back a Json object with the statistics of the visitors status from a certain time interval. The object's schema is described at the end in the Definitions section.
 
 Example call:
 ```
-  IntercomService.post('/push/platform', {
-    site_id: '12312312313',
-    wizard_page_2: '25.4',
-  })
-  ```
+Session.get('/sessionStat', {
+  end:  'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
+  start: 'Thu Feb 18 2016 12:25:45 GMT+0100 (CET)'
+})
+```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Wizard_page_2||
+|QueryParameter|end|The end date of the interval of time.|true|string||
+|QueryParameter|start|The start date of the interval of time.|true|string||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_wizard2|
+|200|The returned statistic elements in a Json object.|Response_sessionStat|
+|400|Returned error message if a parameter is required.|Response_400|
 
 
 #### Tags
 
-* Signup
+* Get
 
-### POST /push/wizard_page_3
-##### Push segment informations about wizard_page_3 to Intercom api
+### Push informations about a cart item
+```
+POST /setCartItem
+```
 
 #### Description
 
-The /push/wizard_page_3 endpoint adds information about how much time a certain user spent on filling the sign up wizard's third page to the Intercom, in an object with 2 parameters given in the body. The object's schema is described at the end in the Definitions section.
+The /setCartItem endpoint adds a Cart Item object to the Cart Items array with the sessionID property as ID. The object is given as a body parameter. The object's schema is described at the end in the Definitions section.
 
 Example call:
 ```
-  IntercomService.post('/push/platform', {
-    site_id: '12312312313',
-    wizard_page_2: '27.7',
-  })
-  ```
+Session.post('/setCartItem', {
+  productID: '12312312313',
+  name: 'Beer',
+  price: 12,
+  qty: 4,
+  qtyPrice: 3,
+  imageUrl: 'http://pngimg.com/img/food/beer',
+  category: 'Booze'
+  productUrl: 'http://john-doe.com'
+})
+```
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||Object that is needed, with 2 parameters.|true|Wizard_page_3||
+|BodyParameter||The expected object with 6 required parameters.|true|Cart_item||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The response is 'ok', if everything went well. Otherwise it returns one of the error messages from the Response schema.|Response_wizard3|
+|200|The response is 'ok', if everything went well.|string|
 
 
 #### Tags
 
-* Signup
+* Post
+
+### Gives statistical information GhostMonitor uses
+```
+GET /statistics
+```
+
+#### Description
+
+The /statistics endpoint gives back a Json object with statistical informations about a page using GhostMonitor in a time range given as parameters. The object's schema is described at the end in the Definitions section.
+
+Example call:
+```
+Session.get('/statistics', {
+  site_id: '12312312313',
+  end:  'Thu Feb 18 2016 14:22:45 GMT+0100 (CET)'
+  start: 'Thu Feb 18 2016 12:25:45 GMT+0100 (CET)'
+})
+```
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|QueryParameter|site_id|The ID of the site you want to get informations about.|true|string||
+|QueryParameter|end|The end date of the interval of time.|true|string||
+|QueryParameter|start|The start date of the interval of time.|true|string||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The returned statistic elements in a Json object.|Response_statistics|
+|400|Returned error message if a parameter is required.|Response_400|
+
+
+#### Tags
+
+* Get
+
+### Synchronize model elements
+```
+POST /synchronize
+```
+
+#### Description
+
+The /synchronize endpoint prepares the Cart Items for Elasticsearch. The object's schema is described at the end in the Definitions section.
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|BodyParameter||Object to synchronize as body parameter.|true|SessionSchema||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The response is 'ok', if everything went well.|string|
+
+
+#### Tags
+
+* Post
+
+### Shows the version number
+```
+GET /version
+```
+
+#### Description
+
+The /version endpoint gives back version number of the current service.
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The version number of the service.|integer|
+
+
+#### Tags
+
+* Get
 
 ## Definitions
-### Account_cancelled
+### ATC
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|account_cancelled|The date when the account was cancelled.|true|string||
+|show||false|integer||
+|hide||false|integer||
+|emailProvide||false|integer||
 
 
-### Cart_recovered
+### Cart_data
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|cart_recovery|The number of recovered carts.|true|string||
+|value|The value of the items the customer wants to buy.|false|integer||
+|itemCount|The number of the items the customer wants to buy.|false|integer||
+|returnUrl||false|string||
 
 
-### Days_left
+### Cart_item
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|trial_days_left|The number of days left from trial version.|true|string||
+|productId|The ID of the product.|true|string||
+|name|The name of the product.|true|string||
+|price|The price of goods.|true|integer||
+|qty|The number of products.|true|integer||
+|qtyPrice|The price of a sigle item.|true|integer||
+|imageUrl|The url to the image of the product.|true|string||
+|category|The category of the goods.|false|string||
+|productUrl|The url to a product.|false|string||
 
 
-### Emails_sent
+### MongoDB_Error
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|emails_sent|The number of emails sent out to the user's customers.|true|string||
+|message|Error object by MongoDB|false|object||
 
 
-### First_customer_ghost
+### Response_400
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|first_customer_ghost_total|Value of the first customer ghost's cart.|true|string||
-|first_customer_ghost_item_count|Number of items recovered.|true|string||
-|first_customer_ghost_email|Email address of the first customer ghost.|true|string||
-
-
-### First_entered
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|first_entered|The date when the user first entered our page.|true|string||
-
-
-### First_ghost
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|first_ghost_total|Value of the first ghost's cart.|true|string||
-|first_ghost_item_count|Number of items in cart.|true|string||
-|first_ghost_email|Email address of the first ghost.|true|string||
-
-
-### Money_recovered
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|money_recovered|The amount of money recovered.|true|string||
-
-
-### Payment
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-
-
-### Plugin
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-
-
-### Response_account_cancelled
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
+|code|400|false|string||
 |message||false|object||
 
 
-### Response_cart_recovered
+### Response_400_2
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
+|code|400|false|string||
 |message||false|object||
 
 
-### Response_days_left
+### Response_activeSites
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
+|code|400|false|string||
 |message||false|object||
 
 
-### Response_emails_sent
+### Response_diagram
+### Response_emailAcquireTypes
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
+|atc||false|integer||
+|login||false|integer||
+|pre_submit||false|integer||
+|conversionRate|The rate of emails sent becuse of the atc popup.|false|number||
 
 
-### Response_first_customer_ghost
+### Response_ghosts
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
+|total|The total number of ghosts.|false|integer||
+|ghosts|Array of sessions of the ghosts.|false|SessionSchema array||
 
 
-### Response_first_entered
+### Response_sessionStat
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_first_ghost
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_money_recovered
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_ok
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|content|ok|false|string||
-
-
-### Response_payment
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_plugin
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_signup_end
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_signup_start
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
+|visitors|Number of visitors|false|integer||
+|ghost|Number of ghosts|false|integer||
+|customer_ghost|Number of customer_ghosts|false|integer||
+|customer|Number of customers|false|integer||
 
 
 ### Response_statistics
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
+|recoveredRevenue|The amount of recovered revenue.|true|integer||
+|shopRevenueWithoutGM|The amount of revenue without GhostMonitor.|true|integer||
+|shopRevenueWithGM|The amount of revenue using GhostMonitor.|true|integer||
+|startedCheckout|The number of started checkouts.|true|integer||
+|abandonedCarts|The number of abandoned carts.|true|integer||
+|recoveredCarts|The number of recovered carts.|true|integer||
+|lostRevenue|The amount of lost revenue.|true|integer||
+|abandonedCartsWithEmail|The number of abandoned carts, with emails sent by GhostMonitor.|true|integer||
+|revenueGrowth|The growth of income.|true|integer||
+|abandonmentRate|The percentage of the abandoned shoppings.|true|number||
+|identifiableRate|The percentage of the identifiable changes.|true|number||
+|conversionRate|The percentage of succesful recoveries.|true|number||
 
 
-### Response_wizard1
+### SessionSchema
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_wizard2
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Response_wizard3
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|code|200|false|string||
-|message||false|object||
-
-
-### Signup_ended
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|name|Name of the newly registered user.|true|string||
-|platform|The ecommerce platform of the site registered.|true|string||
-|sender_email|The date when the signup of the site started.|true|string||
-|time_spent_on_registration|The whole duration of the registration.|true|string||
-|signup_ended|The date when the signup of the user ended.|true|string||
-
-
-### Signup_started
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|email|Email address of site or its owner.|true|string||
-|domain|Domain of the site.|true|string||
-|signup_started|The date when the signup of the user started.|true|string||
-
-
-### Statistics
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|recovered_revenue|The amount of recovered revenue.|true|integer||
-|recovered_revenue_2|The amount of recovered revenue.|true|integer||
-|revenue_with_gm|The amount of revenue using GhostMonitor.|true|integer||
-|revenue_without_gm|The amount of revenue without GhostMonitor.|true|integer||
-|lost_revenue|The amount of lost revenue.|true|integer||
-|revenue_growth|The growth of income.|true|integer||
-|started_checkout|The date the user started the checkout.|true|integer||
-|abandonment_rate|The percentage of the abandoned shoppings.|true|number||
-|abandoned_carts|The number of abandoned carts.|true|integer||
-|identifiable_rate||true|number||
-|abandoned_carts_with_email|The number of emails sent to cart abandoners.|true|integer||
-|conversion_rate|The number of abandoned carts.|true|number||
-|carts_recovered||true|integer||
-|emails_sent|The number of emails sent out.|true|integer||
-|open_rate|The percentage of opened emails.|true|number||
-|click_rate|The percentage of clicking to the link in the email.|true|number||
-|query_statistics_at||true|integer||
-|currency_symbol|The symbol of the currency the site uses.|true|string||
-
-
-### Wizard_page_1
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|wizard_page_1|The time it took to fill the first page of the sign up wizard.|true|string||
-
-
-### Wizard_page_2
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|wizard_page_2|The time it took to fill the second page of the sign up wizard.|true|string||
-
-
-### Wizard_page_3
-|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|
-|site_id|ID of the site you want to add information about.|true|string||
-|wizard_page_3|The time it took to fill the third page of the sign up wizard.|true|string||
-
+|email|The email address of the ghost|false|string||
+|emailAcquireType|The acquire type, it's optional values are atc, login, pre_submit.|false|string||
+|phone|The phone number of the ghost.|false|string||
+|name|Name of the ghost visitor.|false|string||
+|site|The ID of the site the ghost visited.|false|string||
+|isArActive||false|boolean||
+|sessionType|State of session the customer is in.|false|string||
+|fields||false|object||
+|cartData||false|Cart_data||
+|cartItems||false|Cart_item array||
+|shortCartUrl||false|string||
+|startedAt|The date the ghost started the purchase.|false|string||
+|lastHeartbeatAt|The date the ghost was on the site for the last time.|false|string||
+|cartStartedAt|The date the ghost started filling it's cart.|false|string||
+|convertedAt|The date the ghost's cart was recovered.|false|string||
+|atc||false|ATC||
+|shopifyCartId||false|string||
+|shopify||false|object||
 
 
