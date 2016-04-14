@@ -7,9 +7,10 @@ Manages the statistical information of the sites using GhostMonitor
 Version: 0.4.3
 
 ## Paths
-
-### GET /__healthy
-##### Returns 'OK' to show that the service is working
+### Returns 'OK' to show that the service is working
+```
+GET /__healthy
+```
 
 #### Description
 
@@ -19,15 +20,17 @@ The /__healthy endpoint gives back 'OK' with code 200, to enable the user to che
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|An 'OK' answer.|string|
+|200|An OK answer.|string|
 
 
 #### Tags
 
 * Get
 
-### GET /count
-##### Counts the model elements in the database
+### Counts the model elements in the database
+```
+GET /count
+```
 
 #### Description
 
@@ -45,8 +48,10 @@ The /count endpoint gives back the number of service model elements in the datab
 
 * Get
 
-### GET /rest
-##### Search database for all the service model elements
+### Search database for all the service model elements
+```
+GET /rest
+```
 
 #### Description
 
@@ -64,8 +69,10 @@ The /rest get endpoint gives back the service model elements from the database. 
 
 * Get
 
-### POST /rest
-##### Creates a new model element with the data object given as body parameter
+### Creates a new model element with the data object given as body parameter
+```
+POST /rest
+```
 
 #### Description
 
@@ -89,8 +96,10 @@ The /rest post endpoint creates and adds a new element to the database, in form 
 
 * Post
 
-### PATCH /rest
-##### Search in database and update one service model element
+### Search in database and update one service model element
+```
+PATCH /rest
+```
 
 #### Description
 
@@ -108,8 +117,10 @@ The /rest patch endpoint find and update one service model element from the data
 
 * Patch
 
-### GET /rest/{id}
-##### Search database for a particular service model element
+### Search database for a particular service model element
+```
+GET /rest/{id}
+```
 
 #### Description
 
@@ -138,8 +149,10 @@ The /rest/:id get endpoint gives back the service model element with matching ID
 
 * Get
 
-### DELETE /rest/{id}
-##### Delete a particular service model element
+### Delete a particular service model element
+```
+DELETE /rest/{id}
+```
 
 #### Description
 
@@ -168,8 +181,10 @@ The /rest/:id delete endpoint search and then delete a model element with the ID
 
 * Delete
 
-### PUT /rest/{id}
-##### Find and update an element
+### Find and update an element
+```
+PUT /rest/{id}
+```
 
 #### Description
 
@@ -194,8 +209,10 @@ The /rest/:id put endpoint search and then update a model element with the ID ma
 
 * Put
 
-### GET /version
-##### Shows the version number
+### Shows the version number
+```
+GET /version
+```
 
 #### Description
 
@@ -218,11 +235,11 @@ The /version endpoint gives back version number of the current service.
 |----|----|----|----|----|
 |city||false|string||
 |zipCode||false|string||
-|company||false|string||
+|company|The name of the company or the site owner.|false|string||
 |country||false|string||
 |state||false|string||
 |address||false|string||
-|industry||false|string array||
+|industry|The industry/industries the webshop supplies.|false|string array||
 |phone||false|string||
 
 
@@ -298,7 +315,7 @@ The /version endpoint gives back version number of the current service.
 |installData||false|string||
 |trialEndsAt||false|string||
 |isBillingActive||false|enum (active, inactive, trial)|trial|
-|campaignItemLanguage|Object ID.|false|string||
+|campaignItemLanguage|ID of campaignItemLanguage.|false|string||
 |tracking||false|object||
 |hasFirstGhost||false|boolean|false|
 |hasFirstCustomerGhost||false|boolean|false|
