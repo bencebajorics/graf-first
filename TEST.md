@@ -1,15 +1,15 @@
-# Country Model Service
+# Currency Model Service
 
 ## Overview
-Service for country collection
+Service for currency collection
 
 ### Version information
-Version: 0.1.7
+Version: 0.2.1
 
 ## Paths
 
 ### GET /__healthy
-##### Returns 'OK' to show that the service is working
+### Returns 'OK' to show that the service is working
 
 #### Description
 
@@ -27,7 +27,7 @@ The /__healthy endpoint gives back 'OK' with code 200, to enable the user to che
 * Get
 
 ### GET /count
-##### Counts the model elements in the database
+##### Counts the model elements in the databaseunt
 
 #### Description
 
@@ -45,18 +45,37 @@ The /count endpoint gives back the number of service model elements in the datab
 
 * Get
 
+### PATCH /rest
+### Search in database and update one service model element
+
+#### Description
+
+The /rest patch endpoint find and update one service model element from the database. The element is determined by an array's first object. In the secound object of the array you give the parameters you want to change. The object's schema is described at the end in the Definitions section.
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The updated model elements.|CurrencySchema array|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Patch
+
 ### POST /rest
 ##### Creates a new model element with the data object given as body parameter
 
 #### Description
 
-The /rest post endpoint creates and adds a new element to the database, in form of a CountrySchema. The object's schema is described at the end in the Definitions section.
+The /rest post endpoint creates and adds a new element to the database, in form of a CurrencySchema. The object's schema is described at the end in the Definitions section.
 
 
 #### Parameters
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
-|BodyParameter||The expected object with two required parameters.|true|CountrySchema||
+|BodyParameter||The expected object with two required parameters.|true|CurrencySchema||
 
 
 #### Responses
@@ -81,62 +100,13 @@ The /rest get endpoint gives back the service model elements from the database. 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The returned model elements.|CountrySchema array|
+|200|The returned model elements.|CurrencySchema array|
 |400|Validation error by MongoDB.|MongoDB_Error|
 
 
 #### Tags
 
 * Get
-
-### PATCH /rest
-##### Search in database and update one service model element
-
-#### Description
-
-The /rest patch endpoint find and update one service model element from the database. The element is determined by an array's first object. In the secound object of the array you give the parameters you want to change. The object's schema is described at the end in the Definitions section.
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The updated model elements.|CountrySchema array|
-|400|Validation error by MongoDB.|MongoDB_Error|
-
-
-#### Tags
-
-* Patch
-
-### DELETE /rest/{id}
-##### Delete a particular service model element
-
-#### Description
-
-The /rest/:id delete endpoint search and then delete a model element with the ID matching the path parameter. The deleted object's schema is described at the end in the Definitions section.
-
-  Example call:
-  ```
-  Country.delete('/rest/12312312313')
-  ```
-
-
-#### Parameters
-|Type|Name|Description|Required|Schema|Default|
-|----|----|----|----|----|----|
-|PathParameter|id|The ID of the element you want to delete|true|string||
-
-
-#### Responses
-|HTTP Code|Description|Schema|
-|----|----|----|
-|200|The deleted model element.|CountrySchema|
-|400|Validation error by MongoDB.|MongoDB_Error|
-
-
-#### Tags
-
-* Delete
 
 ### GET /rest/{id}
 ##### Search database for a particular service model element
@@ -147,7 +117,7 @@ The /rest/:id get endpoint gives back the service model element with matching ID
 
   Example call:
   ```
-  Country.get('/rest/12312312313')
+  Currency.get('/rest/12312312313')
   ```
 
 
@@ -160,7 +130,7 @@ The /rest/:id get endpoint gives back the service model element with matching ID
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The returned model element.|CountrySchema|
+|200|The returned model element.|CurrencySchema|
 |400|Validation error by MongoDB.|MongoDB_Error|
 
 
@@ -180,19 +150,49 @@ The /rest/:id put endpoint search and then update a model element with the ID ma
 |Type|Name|Description|Required|Schema|Default|
 |----|----|----|----|----|----|
 |PathParameter|id|The ID of the element you want to delete|true|string||
-|BodyParameter||The expected object with all required parameters.|true|CountrySchema||
+|BodyParameter||The expected object with all required parameters.|true|CurrencySchema||
 
 
 #### Responses
 |HTTP Code|Description|Schema|
 |----|----|----|
-|200|The updated model element.|CountrySchema|
+|200|The updated model element.|CurrencySchema|
 |400|Validation error by MongoDB.|MongoDB_Error|
 
 
 #### Tags
 
 * Put
+
+### DELETE /rest/{id}
+##### Delete a particular service model element
+
+#### Description
+
+The /rest/:id delete endpoint search and then delete a model element with the ID matching the path parameter. The deleted object's schema is described at the end in the Definitions section.
+
+  Example call:
+  ```
+  Currency.delete('/rest/12312312313')
+  ```
+
+
+#### Parameters
+|Type|Name|Description|Required|Schema|Default|
+|----|----|----|----|----|----|
+|PathParameter|id|The ID of the element you want to delete|true|string||
+
+
+#### Responses
+|HTTP Code|Description|Schema|
+|----|----|----|
+|200|The deleted model element.|CurrencySchema|
+|400|Validation error by MongoDB.|MongoDB_Error|
+
+
+#### Tags
+
+* Delete
 
 ### GET /version
 ##### Shows the version number
@@ -213,11 +213,13 @@ The /version endpoint gives back version number of the current service.
 * Get
 
 ## Definitions
-### CountrySchema
+### CurrencySchema
 |Name|Description|Required|Schema|Default|
 |----|----|----|----|----|
-|country||true|string||
-|states||false|string array||
+|slug||false|string||
+|name||false|string||
+|symbol||false|string||
+|template||false|string|<%= symbol %><%= amount %>|
 
 
 ### MongoDB_Error
