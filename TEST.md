@@ -1,13 +1,13 @@
-# Ghost Service
+# Plan Model Service
 
 
 <a name="overview"></a>
 ## Overview
-Service for finding ghost sessions
+Service for plan database collection
 
 
 ### Version information
-*Version* : 1.0.0
+*Version* : 0.2.0
 
 
 
@@ -15,28 +15,71 @@ Service for finding ghost sessions
 <a name="paths"></a>
 ## Paths
 
-<a name="inspectsession-post"></a>
-### POST /inspectSession
-##### Inspects a session on a site, logs the result parameters, and puts them in an SQS queue.
+<a name="healthy-get"></a>
+### GET /__healthy
+##### Returns 'OK' to show that the service is working
 
 
 #### Description
-The /inspectSession post endpoint inspects a specific session given by its ID. It takes the session_id as a query parameter, checks if it's correct, and then checks the site where the session occurred. If everything checks out it sends an object, described below as ResultObject, to the AWS.SQS.
-
-
-#### Parameters
-
-|Type|Name|Description|Schema|Default|
-|---|---|---|---|---|
-|**Query**|**session_id**  <br>*required*|The Id of a session.|string||
+The /__healthy endpoint gives back 'OK' with code 200, to enable the user to check whether the service is working or not.
 
 
 #### Responses
 
 |HTTP Code|Description|Schema|
 |---|---|---|
-|**200**|The response is an object from AWS SQS, if everything went well.|[ResponseObject](#responseobject)|
-|**400**|Validation error.|[Error](#error)|
+|**200**|An OK answer.|string|
+
+
+#### Tags
+
+* Get
+
+
+<a name="count-get"></a>
+### GET /count
+##### Counts the model elements in the database
+
+
+#### Description
+The /count endpoint gives back the number of service model elements in the database. The object's schema is described at the end in the Definitions section.
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The number of elements.|integer|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
+
+
+#### Tags
+
+* Get
+
+
+<a name="rest-post"></a>
+### POST /rest
+##### Creates a new model element with the data object given as body parameter
+
+
+#### Description
+The /rest post endpoint creates and adds a new element to the database, in form of a PlanSchema. The object's schema is described at the end in the Definitions section.
+
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Body**|**Object**  <br>*required*|The expected object with one required parameters.|[PlanSchema](#planschema)||
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**201**|The response is 'ok', if everything went well.|string|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
 
 
 #### Tags
@@ -44,43 +87,193 @@ The /inspectSession post endpoint inspects a specific session given by its ID. I
 * Post
 
 
+<a name="rest-get"></a>
+### GET /rest
+##### Search database for all the service model elements
+
+
+#### Description
+The /rest get endpoint gives back the service model elements from the database. The object's schema is described at the end in the Definitions section.
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The returned model elements.|< [PlanSchema](#planschema) > array|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
+
+
+#### Tags
+
+* Get
+
+
+<a name="rest-patch"></a>
+### PATCH /rest
+##### Search in database and update one service model element
+
+
+#### Description
+The /rest patch endpoint find and update one service model element from the database. The element is determined by an array's first object. In the second object of the array you give the parameters you want to change. The object's schema is described at the end in the Definitions section.
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The updated model elements.|< [PlanSchema](#planschema) > array|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
+
+
+#### Tags
+
+* Patch
+
+
+<a name="rest-id-get"></a>
+### GET /rest/{id}
+##### Search database for a particular service model element
+
+
+#### Description
+The /rest/:id get endpoint gives back the service model element with matching ID from the database. The object's schema is described at the end in the Definitions section.
+
+  Example call:
+  ```
+  Plan.get('/rest/12312312313')
+  ```
+
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|The ID of the element you want to get|string||
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The returned model element.|[PlanSchema](#planschema)|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
+
+
+#### Tags
+
+* Get
+
+
+<a name="rest-id-put"></a>
+### PUT /rest/{id}
+##### Find and update an element
+
+
+#### Description
+The /rest/:id put endpoint search and then update a model element with the ID matching the path parameter. The updated object's schema is described at the end in the Definitions section.
+
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|The ID of the element you want to delete|string||
+|**Body**|**Ofbject**  <br>*required*|The expected object with all required parameters.|[PlanSchema](#planschema)||
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The updated model element.|[PlanSchema](#planschema)|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
+
+
+#### Tags
+
+* Put
+
+
+<a name="rest-id-delete"></a>
+### DELETE /rest/{id}
+##### Delete a particular service model element
+
+
+#### Description
+The /rest/:id delete endpoint search and then delete a model element with the ID matching the path parameter. The deleted object's schema is described at the end in the Definitions section.
+
+  Example call:
+  ```
+  Plan.delete('/rest/12312312313')
+  ```
+
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|The ID of the element you want to delete|string||
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The deleted model element.|[PlanSchema](#planschema)|
+|**400**|Validation error by MongoDB.|[MongoDB_Error](#mongodb_error)|
+
+
+#### Tags
+
+* Delete
+
+
+<a name="version-get"></a>
+### GET /version
+##### Shows the version number
+
+
+#### Description
+The /version endpoint gives back version number of the current service.
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|The version number of the service.|integer|
+
+
+#### Tags
+
+* Get
+
+
 
 
 <a name="definitions"></a>
 ## Definitions
 
-<a name="error"></a>
-### Error
+<a name="mongodb_error"></a>
+### MongoDB_Error
 
 |Name|Description|Schema|
 |---|---|---|
-|**message_1**  <br>*optional*|Session id is missing!|string|
-|**message_2**  <br>*optional*|Invalid session!|string|
-|**message_3**  <br>*optional*|Invalid site!|string|
+|**message**  <br>*optional*|Error object by MongoDB|object|
 
 
-<a name="responseobject"></a>
-### ResponseObject
-the response object containing error, data properties, and the original request object.
-
+<a name="planschema"></a>
+### PlanSchema
 
 |Name|Description|Schema|
 |---|---|---|
-|**MessageId**  <br>*optional*|An identifier for the message.|string|
-|**RequestObject**  <br>*optional*||[ResultObject](#resultobject)|
-|**err**  <br>*optional*|the error object returned from the request. Set to null if the request is successful.|object|
-
-
-<a name="resultobject"></a>
-### ResultObject
-The object sent to the SQS.
-
-
-|Name|Description|Schema|
-|---|---|---|
-|**DelaySeconds**  <br>*optional*|The delay/heartbeatTimeout of the site.|number|
-|**MessageBody**  <br>*optional*|The sessionId.|string|
-|**QueueUrl**  <br>*optional*|The sqsQueueUrl.|string|
+|**commission**  <br>*optional*||number|
+|**description**  <br>*optional*|**Default** : `""`|string|
+|**features**  <br>*optional*||< string > array|
+|**name**  <br>*optional*||string|
+|**slug**  <br>*optional*|**Default** : `""`|string|
+|**subscriptionFee**  <br>*optional*||number|
 
 
 
