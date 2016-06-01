@@ -1,44 +1,52 @@
-# Ghost Service
+# Sass Service
 
 
 <a name="overview"></a>
 ## Overview
-Service for finding ghost sessions
+Service to render sass
 
 
 ### Version information
-*Version* : 1.0.0
-
-
-
+*Version* : 0.1.0
 
 <a name="paths"></a>
 ## Paths
 
-<a name="inspectsession-post"></a>
-### Inspects a session on a site, logs the result parameters, and puts them in an SQS queue.
+<a name="render-post"></a>
+### Renders scss to css
 ```
-POST /inspectSession
+POST /render
 ```
 
 
 #### Description
-The /inspectSession post endpoint inspects a specific session given by its ID. It takes the session_id as a query parameter, checks if it's correct, and then checks the site where the session occurred. If everything checks out it sends an object, described below as ResultObject, to the AWS.SQS.
+The /render post endpoint render the given scss parameter into css elements using node-sass, and returns them if everything went well.
+
+  Example call:
+  ```
+  SassService.post('/render', {
+    '$font-stack:    Helvetica, sans-serif;
+     $primary-color: #333;
+     body {
+      font: 100% $font-stack;
+      color: $primary-color;
+    }'
+  })
+  ```
 
 
 #### Parameters
 
 |Type|Name|Description|Schema|Default|
 |---|---|---|---|---|
-|**Query**|**session_id**  <br>*required*|The Id of a session.|string||
+|**Body**|**scss**  <br>*required*|The scss object you want to turn into css.|[Scss](#scss)||
 
 
 #### Responses
 
 |HTTP Code|Description|Schema|
 |---|---|---|
-|**200**|The response is an object from AWS SQS, if everything went well.|[ResponseObject](#responseobject)|
-|**400**|Validation error.|[Error](#error)|
+|**200**|The response is the rendered object.|object|
 
 
 #### Tags
@@ -51,35 +59,9 @@ The /inspectSession post endpoint inspects a specific session given by its ID. I
 <a name="definitions"></a>
 ## Definitions
 
-<a name="error"></a>
-### Error
+<a name="scss"></a>
+### Scss
 
 |Name|Description|Schema|
 |---|---|---|
-|**message_1**  <br>*optional*|Session id is missing!|string|
-|**message_2**  <br>*optional*|Invalid session!|string|
-|**message_3**  <br>*optional*|Invalid site!|string|
-
-
-<a name="responseobject"></a>
-### ResponseObject
-the response object containing error, data properties, and the original request object.
-
-
-|Name|Description|Schema|
-|---|---|---|
-|**MessageId**  <br>*optional*|An identifier for the message.|string|
-|**RequestObject**  <br>*optional*||[ResultObject](#resultobject)|
-|**err**  <br>*optional*|the error object returned from the request. Set to null if the request is successful.|object|
-
-
-<a name="resultobject"></a>
-### ResultObject
-The object sent to the SQS.
-
-
-|Name|Description|Schema|
-|---|---|---|
-|**DelaySeconds**  <br>*optional*|The delay/heartbeatTimeout of the site.|number|
-|**MessageBody**  <br>*optional*|The sessionId.|string|
-|**QueueUrl**  <br>*optional*|The sqsQueueUrl.|string|
+|**scss**  <br>*optional*|Some scss code.|string|
